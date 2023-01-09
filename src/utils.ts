@@ -22,8 +22,7 @@ export async function isAuthenticated(
   const token = getToken(context)
   if (!token) return false
 
-  const origin = context.req.headers.get('origin');
-  console.log(origin, context.req)
+  const origin = context.req.get('origin');
   if (checkIp && !origin) return false
   
   try {

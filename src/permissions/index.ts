@@ -3,7 +3,7 @@ import { isAuthenticated } from '../utils'
 
 const rules = {
   isAuthenticated: rule()(async (parent, args, context) => {
-    const authenticated = await isAuthenticated(context)
+    const authenticated = await isAuthenticated(context, false)
     return Boolean(authenticated)
   }),
 }

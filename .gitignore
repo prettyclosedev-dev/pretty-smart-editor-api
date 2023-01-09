@@ -106,3 +106,5 @@ dist
 dist/
 src/generated/
 *.env*
+
+.vscode

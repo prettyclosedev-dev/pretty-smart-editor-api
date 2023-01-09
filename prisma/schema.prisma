@@ -1,0 +1,59 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Client {
+  id    Int    @id @default(autoincrement())
+  name  String
+  token String @unique @default(uuid())
+  ip    String @unique
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  name    String
+  email   String?  @unique
+  designs Design[]
+}
+
+model Page {
+  id         Int     @id @default(autoincrement())
+  polotnoId  String? @unique
+  children   Json[]
+  width      String  @default("auto")
+  height     String  @default("auto")
+  background String
+  bleed      Int
+  design     Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
+  designId   Int
+}
+
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String
+  designs Design[]
+}
+
+model Design {
+  id            Int       @id @default(autoincrement())
+  polotnoId     String?   @unique
+  name          String
+  preview       String
+  pages         Page[]
+  width         Int
+  height        Int
+  fonts         String[]
+  unit          String    @default("px")
+  dpi           Int       @default(72)
+  publishedDate DateTime  @default(now())
+  editedDate    DateTime  @default(now())
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    Int?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int?
+}

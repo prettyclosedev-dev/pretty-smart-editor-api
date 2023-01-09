@@ -1,0 +1,87 @@
+import { rule, shield } from 'graphql-shield'
+import { isAuthenticated } from '../utils'
+
+const rules = {
+  isAuthenticated: rule()(async (parent, args, context) => {
+    const authenticated = await isAuthenticated(context)
+    return Boolean(authenticated)
+  }),
+}
+
+export const permissions = shield(
+  {
+    Query: {
+      // designs
+      client: rules.isAuthenticated,
+      clients: rules.isAuthenticated,
+      clientsCount: rules.isAuthenticated,
+
+      // designs
+      design: rules.isAuthenticated,
+      designs: rules.isAuthenticated,
+      designsCount: rules.isAuthenticated,
+
+      // pages
+      page: rules.isAuthenticated,
+      pages: rules.isAuthenticated,
+      pagesCount: rules.isAuthenticated,
+
+      // users
+      user: rules.isAuthenticated,
+      users: rules.isAuthenticated,
+      usersCount: rules.isAuthenticated,
+
+      // categories
+      category: rules.isAuthenticated,
+      categories: rules.isAuthenticated,
+      categoriesCount: rules.isAuthenticated,
+    },
+    Mutation: {
+      // Create one
+      createOneClient: rules.isAuthenticated,
+      createOneDesign: rules.isAuthenticated,
+      createOnePage: rules.isAuthenticated,
+      createOneCategory: rules.isAuthenticated,
+      createOneUser: rules.isAuthenticated,
+      // Create many
+      createManyClient: rules.isAuthenticated,
+      createManyUser: rules.isAuthenticated,
+      createManyCategory: rules.isAuthenticated,
+      createManyDesign: rules.isAuthenticated,
+      createManyPage: rules.isAuthenticated,
+      // Update one
+      updateOneClient: rules.isAuthenticated,
+      updateOneDesign: rules.isAuthenticated,
+      updateOnePage: rules.isAuthenticated,
+      updateOneCategory: rules.isAuthenticated,
+      updateOneUser: rules.isAuthenticated,
+      // Update many
+      updateManyClient: rules.isAuthenticated,
+      updateManyDesign: rules.isAuthenticated,
+      updateManyPage: rules.isAuthenticated,
+      updateManyCategory: rules.isAuthenticated,
+      updateManyUser: rules.isAuthenticated,
+      // Upsert one
+      upsertOneClient: rules.isAuthenticated,
+      upsertOneDesign: rules.isAuthenticated,
+      upsertOnePage: rules.isAuthenticated,
+      upsertOneCategory: rules.isAuthenticated,
+      upsertOneUser: rules.isAuthenticated,
+      // Delete one
+      deleteOneClient: rules.isAuthenticated,
+      deleteOneDesign: rules.isAuthenticated,
+      deleteOnePage: rules.isAuthenticated,
+      deleteOneUser: rules.isAuthenticated,
+      deleteOneCategory: rules.isAuthenticated,
+      // Delete many
+      deleteManyClient: rules.isAuthenticated,
+      deleteManyDesign: rules.isAuthenticated,
+      deleteManyPage: rules.isAuthenticated,
+      deleteManyUser: rules.isAuthenticated,
+      deleteManyCategory: rules.isAuthenticated,
+    },
+  },
+  {
+    debug: false,
+  },
+)

@@ -12,6 +12,7 @@ export const Design = objectType({
     t.model.pages({ ordering: true, filtering: true, pagination: true })
     t.model.fonts()
     t.model.unit()
+    t.model.dpi()
     t.model.publishedDate()
     t.model.editedDate()
     t.model.category()

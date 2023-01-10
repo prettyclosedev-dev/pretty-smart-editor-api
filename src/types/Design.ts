@@ -4,6 +4,7 @@ export const Design = objectType({
   name: 'Design',
   definition(t) {
     t.model.id()
+    t.model.polotnoId()
     t.model.name()
     t.model.preview()
     t.model.width()

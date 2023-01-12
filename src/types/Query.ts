@@ -85,5 +85,23 @@ export const Query = queryType({
         })
       },
     })
+
+    t.nullable.field('overridePreview', {
+      type: 'String',
+      // args: {
+      //   data: "DesignCreateInput"
+      // },
+      resolve: async (parent, args, ctx) => {
+        try {
+          const {run} = require("../../polotno/demo")
+         const data = await run()
+         console.log(data)
+         return ""
+        } catch (e) {
+          console.log(e)
+          return ""
+        }
+      },
+    })
   },
 })

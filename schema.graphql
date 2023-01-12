@@ -81,6 +81,7 @@ input CategoryWhereUniqueInput {
 
 type Client {
   id: Int!
+  ip: String!
   name: String!
   token: String!
 }
@@ -145,12 +146,14 @@ input DateTimeFilter {
 
 type Design {
   category: Category
+  dpi: Int!
   editedDate: DateTime!
   fonts: [String!]!
   height: Int!
   id: Int!
   name: String!
   pages(cursor: PageWhereUniqueInput, orderBy: [PageOrderByWithRelationInput!], skip: Int, take: Int, where: PageWhereInput): [Page!]!
+  polotnoId: String
   preview: String!
   publishedDate: DateTime!
   unit: String!
@@ -858,6 +861,7 @@ type Query {
   design(where: DesignWhereUniqueInput!): Design
   designs(cursor: DesignWhereUniqueInput, orderBy: [DesignOrderByWithRelationInput!], skip: Int, take: Int, where: DesignWhereInput): [Design!]!
   designsCount(where: DesignWhereInput): Int
+  overridePreview: String
   page(where: PageWhereUniqueInput!): Page
   pages(cursor: PageWhereUniqueInput, orderBy: [PageOrderByWithRelationInput!], skip: Int, take: Int, where: PageWhereInput): [Page!]!
   pagesCount(where: PageWhereInput): Int

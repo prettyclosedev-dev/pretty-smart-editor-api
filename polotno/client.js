@@ -1,0 +1,32 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Workspace } from 'polotno/canvas/workspace';
+import { createStore } from 'polotno/model/store';
+import { toggleFadeInAnimation } from 'polotno/canvas/use-fadein';
+import {
+  unstable_setTextOverflow,
+  unstable_useHtmlTextRender,
+  onLoadError,
+} from 'polotno/config';
+
+import { addGlobalFont } from 'polotno/utils/fonts';
+import { POLOTNO_KEY } from './config';
+
+toggleFadeInAnimation(false);
+unstable_setTextOverflow('change-font-size');
+
+const key = new URLSearchParams(location.search).get('key');
+
+const store = createStore({
+  key: POLOTNO_KEY,
+});
+
+window.store = store;
+window.config = {
+  addGlobalFont,
+  unstable_useHtmlTextRender,
+  onLoadError,
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Workspace store={store} />);

@@ -1,0 +1,37 @@
+{
+  "name": "polotno-node",
+  "version": "1.0.0",
+  "description": "Polotno workflow from NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf ./dist && parcel build ./client.html --public-url ./ && rm ./dist/*js.map "
+  },
+  "files": [
+    "dist",
+    "index.js",
+    "instance.js",
+    "README.md"
+  ],
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "polotno": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "author": "Anton Lavrenov",
+  "license": "MIT",
+  "dependencies": {
+    "chrome-aws-lambda": "^10.1.0",
+    "puppeteer": "^15.5.0"
+  },
+  "bugs": {
+    "url": "https://github.com/polotno-project/polotno-node/issues"
+  },
+  "homepage": "https://github.com/polotno-project/polotno-node",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:polotno-project/polotno-node.git"
+  }
+}

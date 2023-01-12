@@ -1,0 +1,9 @@
+node_modules
+.cache
+out.png
+package-lock.json
+dist
+.parcel-cache
+*.lock
+*private.json
+out.pdf

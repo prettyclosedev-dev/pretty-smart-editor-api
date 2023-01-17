@@ -1,9 +1,7 @@
-const fs = require('fs')
 const { POLOTNO_KEY } = require('./config.js')
 const { createInstance } = require('./index.js')
-const path = require('path')
 
-async function run() {
+async function run(json) {
   try {
     console.time('export')
     // create working instance
@@ -11,20 +9,17 @@ async function run() {
       key: POLOTNO_KEY,
     })
 
-    // load sample json
-    const json = JSON.parse(
-      fs.readFileSync(path.join(__dirname, './test-data/polotno3.json')),
-    )
-
     // json.pages.forEach((page, index) => {
     const base64 = await instance.jsonToImageBase64(json, {
       // quality: 0.6,
       // parallel: 7,
     })
-    fs.writeFileSync('out.png', base64, 'base64')
+    
     console.timeEnd('export')
     // close instance
     instance.close()
+
+    return base64;
   } catch (e) {
     throw e
   }
@@ -33,5 +28,3 @@ async function run() {
 module.exports = {
   run,
 }
-
-// run();

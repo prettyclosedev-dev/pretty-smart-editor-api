@@ -66,7 +66,7 @@ async function startApolloServer() {
     context: createContext,
     introspection: true,
     csrfPrevention: true,
-    apollo: { graphId: process.env.APOLLO_GRAPH_ID },
+    apollo: { graphRef: process.env.APOLLO_GRAPH_REF },
     plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
     cache: 'bounded',
   })

@@ -1,5 +1,5 @@
-const POLOTNO_KEY = "REMOVED_POLOTNO_KEY"
+const POLOTNO_KEY = 'REMOVED_POLOTNO_KEY'
 
 module.exports = {
-    POLOTNO_KEY
-  }
+  POLOTNO_KEY,
+}

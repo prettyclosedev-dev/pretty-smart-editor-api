@@ -18,7 +18,7 @@ unstable_setTextOverflow('change-font-size');
 const key = new URLSearchParams(location.search).get('key');
 
 const store = createStore({
-  key: POLOTNO_KEY,
+  key: key || POLOTNO_KEY,
 });
 
 window.store = store;

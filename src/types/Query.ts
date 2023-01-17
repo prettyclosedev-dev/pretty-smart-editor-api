@@ -6,6 +6,7 @@ import {
   stringArg,
   nonNull,
   inputObjectType,
+  nullable,
 } from 'nexus'
 import {
   getCustomTokenForUserByEmail,
@@ -88,18 +89,34 @@ export const Query = queryType({
 
     t.nullable.field('overridePreview', {
       type: 'String',
-      // args: {
-      //   data: "DesignCreateInput"
-      // },
-      resolve: async (parent, args, ctx) => {
-        try {
-          const {run} = require("../../polotno/demo")
-         const data = await run()
-         console.log(data)
-         return ""
-        } catch (e) {
-          console.log(e)
-          return ""
+      args: {
+        designJson: nullable("Json"),
+        designId: nullable("Int")
+      },
+      resolve: async (parent, {designJson, designId}, ctx) => {
+        if (designJson || !!designId) {
+          if (!designJson && !!designId) {
+            const design = await ctx.prisma.design.findUnique({where: {id: designId}, include: {pages: true}})
+            if (design) {
+              designJson = design
+            } else {
+              throw new Error("No design found for the id provided.")
+            }
+          }
+
+          if (!designJson) {
+            throw new Error("No designJson provided.")
+          }
+
+          try {
+            const {run} = require("../../polotno/preview")
+            const data = await run(designJson)
+            return data;
+          } catch (e) {
+            throw e;
+          }
+        } else {
+          throw new Error("No designJson or designId provided.")
         }
       },
     })

@@ -22,11 +22,11 @@ export async function isAuthenticated(
   const token = getToken(context)
   if (!token) return false
 
-  const origin = context.req.get('origin');
+  const origin = context.req.get('origin')
   if (checkIp && !origin) return false
-  
+
   try {
-    let client = await context.prisma.client.findUnique({where: {token}})
+    let client = await context.prisma.client.findUnique({ where: { token } })
     return (client && !checkIp) || (client && origin === client.ip)
   } catch (err) {
     console.log(err)

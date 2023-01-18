@@ -47,7 +47,7 @@ model Design {
   pages         Page[]
   width         Int
   height        Int
-  fonts         String[]
+  fonts         String[]?
   unit          String    @default("px")
   dpi           Int       @default(72)
   publishedDate DateTime  @default(now())

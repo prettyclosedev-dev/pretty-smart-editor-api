@@ -14,11 +14,19 @@ model Client {
   ip    String @unique
 }
 
+enum UserRole {
+  SUPER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
 model User {
   id      Int      @id @default(autoincrement())
   name    String
   email   String?  @unique
   designs Design[]
+  role    UserRole @default(ADMIN)
 }
 
 model Page {
@@ -47,13 +55,14 @@ model Design {
   pages         Page[]
   width         Int
   height        Int
-  fonts         String[]?
+  fonts         String[]
   unit          String    @default("px")
   dpi           Int       @default(72)
   publishedDate DateTime  @default(now())
   editedDate    DateTime  @default(now())
   category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId    Int?
+  public        Boolean?  @default(false)
   user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int?
 }

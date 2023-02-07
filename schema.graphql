@@ -6,6 +6,11 @@ type AffectedRowsOutput {
   count: Int!
 }
 
+input BoolNullableFilter {
+  equals: Boolean
+  not: NestedBoolNullableFilter
+}
+
 type Category {
   designs(cursor: DesignWhereUniqueInput, orderBy: [DesignOrderByWithRelationInput!], skip: Int, take: Int, where: DesignWhereInput): [Design!]!
   id: Int!
@@ -175,6 +180,7 @@ input DesignCreateInput {
   pages: PageCreateNestedManyWithoutDesignInput
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   user: UserCreateNestedOneWithoutDesignsInput
@@ -190,6 +196,7 @@ input DesignCreateManyCategoryInput {
   name: String!
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   userId: Int
@@ -211,6 +218,7 @@ input DesignCreateManyUserInput {
   name: String!
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   width: Int!
@@ -265,6 +273,7 @@ input DesignCreateWithoutCategoryInput {
   pages: PageCreateNestedManyWithoutDesignInput
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   user: UserCreateNestedOneWithoutDesignsInput
@@ -280,6 +289,7 @@ input DesignCreateWithoutPagesInput {
   name: String!
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   user: UserCreateNestedOneWithoutDesignsInput
@@ -296,6 +306,7 @@ input DesignCreateWithoutUserInput {
   pages: PageCreateNestedManyWithoutDesignInput
   polotnoId: String
   preview: String!
+  public: Boolean
   publishedDate: DateTime
   unit: String
   width: Int!
@@ -323,6 +334,7 @@ input DesignOrderByWithRelationInput {
   pages: PageOrderByRelationAggregateInput
   polotnoId: SortOrder
   preview: SortOrder
+  public: SortOrder
   publishedDate: SortOrder
   unit: SortOrder
   user: UserOrderByWithRelationInput
@@ -343,6 +355,7 @@ input DesignScalarWhereInput {
   OR: [DesignScalarWhereInput!]
   polotnoId: StringNullableFilter
   preview: StringFilter
+  public: BoolNullableFilter
   publishedDate: DateTimeFilter
   unit: StringFilter
   userId: IntNullableFilter
@@ -364,6 +377,7 @@ input DesignUpdateInput {
   pages: PageUpdateManyWithoutDesignNestedInput
   polotnoId: NullableStringFieldUpdateOperationsInput
   preview: StringFieldUpdateOperationsInput
+  public: NullableBoolFieldUpdateOperationsInput
   publishedDate: DateTimeFieldUpdateOperationsInput
   unit: StringFieldUpdateOperationsInput
   user: UserUpdateOneWithoutDesignsNestedInput
@@ -378,6 +392,7 @@ input DesignUpdateManyMutationInput {
   name: StringFieldUpdateOperationsInput
   polotnoId: NullableStringFieldUpdateOperationsInput
   preview: StringFieldUpdateOperationsInput
+  public: NullableBoolFieldUpdateOperationsInput
   publishedDate: DateTimeFieldUpdateOperationsInput
   unit: StringFieldUpdateOperationsInput
   width: IntFieldUpdateOperationsInput
@@ -438,6 +453,7 @@ input DesignUpdateWithoutCategoryInput {
   pages: PageUpdateManyWithoutDesignNestedInput
   polotnoId: NullableStringFieldUpdateOperationsInput
   preview: StringFieldUpdateOperationsInput
+  public: NullableBoolFieldUpdateOperationsInput
   publishedDate: DateTimeFieldUpdateOperationsInput
   unit: StringFieldUpdateOperationsInput
   user: UserUpdateOneWithoutDesignsNestedInput
@@ -453,6 +469,7 @@ input DesignUpdateWithoutPagesInput {
   name: StringFieldUpdateOperationsInput
   polotnoId: NullableStringFieldUpdateOperationsInput
   preview: StringFieldUpdateOperationsInput
+  public: NullableBoolFieldUpdateOperationsInput
   publishedDate: DateTimeFieldUpdateOperationsInput
   unit: StringFieldUpdateOperationsInput
   user: UserUpdateOneWithoutDesignsNestedInput
@@ -469,6 +486,7 @@ input DesignUpdateWithoutUserInput {
   pages: PageUpdateManyWithoutDesignNestedInput
   polotnoId: NullableStringFieldUpdateOperationsInput
   preview: StringFieldUpdateOperationsInput
+  public: NullableBoolFieldUpdateOperationsInput
   publishedDate: DateTimeFieldUpdateOperationsInput
   unit: StringFieldUpdateOperationsInput
   width: IntFieldUpdateOperationsInput
@@ -516,6 +534,7 @@ input DesignWhereInput {
   pages: PageListRelationFilter
   polotnoId: StringNullableFilter
   preview: StringFilter
+  public: BoolNullableFilter
   publishedDate: DateTimeFilter
   unit: StringFilter
   user: UserWhereInput
@@ -526,6 +545,17 @@ input DesignWhereInput {
 input DesignWhereUniqueInput {
   id: Int
   polotnoId: String
+}
+
+input EnumUserRoleFieldUpdateOperationsInput {
+  set: UserRole
+}
+
+input EnumUserRoleFilter {
+  equals: UserRole
+  in: [UserRole!]
+  not: NestedEnumUserRoleFilter
+  notIn: [UserRole!]
 }
 
 input IntFieldUpdateOperationsInput {
@@ -606,6 +636,11 @@ type Mutation {
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
 }
 
+input NestedBoolNullableFilter {
+  equals: Boolean
+  not: NestedBoolNullableFilter
+}
+
 input NestedDateTimeFilter {
   equals: DateTime
   gt: DateTime
@@ -615,6 +650,13 @@ input NestedDateTimeFilter {
   lte: DateTime
   not: NestedDateTimeFilter
   notIn: [DateTime!]
+}
+
+input NestedEnumUserRoleFilter {
+  equals: UserRole
+  in: [UserRole!]
+  not: NestedEnumUserRoleFilter
+  notIn: [UserRole!]
 }
 
 input NestedIntFilter {
@@ -665,6 +707,10 @@ input NestedStringNullableFilter {
   not: NestedStringNullableFilter
   notIn: [String!]
   startsWith: String
+}
+
+input NullableBoolFieldUpdateOperationsInput {
+  set: Boolean
 }
 
 input NullableStringFieldUpdateOperationsInput {
@@ -859,9 +905,11 @@ type Query {
   clients(cursor: ClientWhereUniqueInput, orderBy: [ClientOrderByWithRelationInput!], skip: Int, take: Int, where: ClientWhereInput): [Client!]!
   clientsCount(where: ClientWhereInput): Int
   design(where: DesignWhereUniqueInput!): Design
+  designPreview(args: Json, dataType: String, designId: Int, designJson: Json, mimeType: String): String
   designs(cursor: DesignWhereUniqueInput, orderBy: [DesignOrderByWithRelationInput!], skip: Int, take: Int, where: DesignWhereInput): [Design!]!
   designsCount(where: DesignWhereInput): Int
-  overridePreview: String
+  designToImageBase64(attrs: Json, designId: Int): String
+  jsonToImageBase64(attrs: Json, designJson: Json): String
   page(where: PageWhereUniqueInput!): Page
   pages(cursor: PageWhereUniqueInput, orderBy: [PageOrderByWithRelationInput!], skip: Int, take: Int, where: PageWhereInput): [Page!]!
   pagesCount(where: PageWhereInput): Int
@@ -933,6 +981,7 @@ input UserCreateInput {
   designs: DesignCreateNestedManyWithoutUserInput
   email: String
   name: String!
+  role: UserRole
 }
 
 input UserCreateNestedOneWithoutDesignsInput {
@@ -949,6 +998,7 @@ input UserCreateOrConnectWithoutDesignsInput {
 input UserCreateWithoutDesignsInput {
   email: String
   name: String!
+  role: UserRole
 }
 
 input UserOrderByWithRelationInput {
@@ -956,17 +1006,27 @@ input UserOrderByWithRelationInput {
   email: SortOrder
   id: SortOrder
   name: SortOrder
+  role: SortOrder
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  SUPER
+  VIEWER
 }
 
 input UserUpdateInput {
   designs: DesignUpdateManyWithoutUserNestedInput
   email: NullableStringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
+  role: EnumUserRoleFieldUpdateOperationsInput
 }
 
 input UserUpdateManyMutationInput {
   email: NullableStringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
+  role: EnumUserRoleFieldUpdateOperationsInput
 }
 
 input UserUpdateOneWithoutDesignsNestedInput {
@@ -982,6 +1042,7 @@ input UserUpdateOneWithoutDesignsNestedInput {
 input UserUpdateWithoutDesignsInput {
   email: NullableStringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
+  role: EnumUserRoleFieldUpdateOperationsInput
 }
 
 input UserUpsertWithoutDesignsInput {
@@ -997,6 +1058,7 @@ input UserWhereInput {
   name: StringFilter
   NOT: [UserWhereInput!]
   OR: [UserWhereInput!]
+  role: EnumUserRoleFilter
 }
 
 input UserWhereUniqueInput {

@@ -87,13 +87,55 @@ export const Query = queryType({
       },
     })
 
-    t.nullable.field('overridePreview', {
+    t.nullable.field('jsonToImageBase64', {
+      type: 'String',
+      args: {
+        designJson: "Json",
+        attrs: "Json"
+      },
+      resolve: async (parent, {designJson, attrs}, ctx) => {
+        try {
+          const {jsonToImageBase64} = require("../../polotno/preview")
+          const data = await jsonToImageBase64(designJson, attrs)
+          return data;
+        } catch (e) {
+          throw e;
+        }
+      },
+    })
+
+    t.nullable.field('designToImageBase64', {
+      type: 'String',
+      args: {
+        designId: "Int",
+        attrs: "Json"
+      },
+      resolve: async (parent, {designId, attrs}, ctx) => {
+        try {
+          const designJson = await ctx.prisma.design.findUnique({where: {id: designId}, include: {pages: true}})
+          if (!designJson) {
+            throw new Error("No design found for the id provided.")
+          }
+
+          const {jsonToImageBase64} = require("../../polotno/preview")
+          const data = await jsonToImageBase64(designJson, attrs)
+          return data;
+        } catch (e) {
+          throw e;
+        }
+      },
+    })
+
+    t.nullable.field('designPreview', {
       type: 'String',
       args: {
         designJson: nullable("Json"),
-        designId: nullable("Int")
+        designId: nullable("Int"),
+        mimeType: "String", // png, jpg, pdf, svg?
+        dataType: "String", // base64, dataURL
+        args: nullable("Json"),
       },
-      resolve: async (parent, {designJson, designId}, ctx) => {
+      resolve: async (parent, {designJson, designId, mimeType, dataType, args}, ctx) => {
         if (designJson || !!designId) {
           if (!designJson && !!designId) {
             const design = await ctx.prisma.design.findUnique({where: {id: designId}, include: {pages: true}})
@@ -109,8 +151,21 @@ export const Query = queryType({
           }
 
           try {
-            const {run} = require("../../polotno/preview")
-            const data = await run(designJson)
+            const {jsonToImageBase64, jsonToDataURL, jsonToPDFBase64, jsonToPDFDataURL} = require("../../polotno/preview")
+            let data;
+            if (mimeType === "pdf") {
+              if (dataType === "base64") {
+                data = await jsonToPDFBase64(designJson, args)
+              } else {
+                data = await jsonToPDFDataURL(designJson, args)
+              }
+            } else {
+              if (dataType === "base64") {
+                data = await jsonToImageBase64(designJson, args)
+              } else {
+                data = await jsonToDataURL(designJson, args)
+              }
+            }
             return data;
           } catch (e) {
             throw e;

@@ -13,6 +13,16 @@ import {
   isAuthenticated,
   searchProcessesAsync,
 } from '../utils'
+
+import { Configuration, OpenAIApi } from "openai";
+
+const OPENAI_API_KEY = "REMOVED_OPENAI_KEY";
+
+const configuration = new Configuration({
+  apiKey: OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
 require('dotenv').config()
 
 export const Query = queryType({
@@ -172,6 +182,24 @@ export const Query = queryType({
           }
         } else {
           throw new Error("No designJson or designId provided.")
+        }
+      },
+    })
+
+    t.nullable.field('chatGPT', {
+      type: 'Json',
+      args: {
+        messages: "Json",
+      },
+      resolve: async (parent, {messages}, ctx) => {
+        try {
+          const completion = await openai.createChatCompletion({
+            model: "gpt-4",
+            messages,
+          });
+          return completion.data.choices[0].message;
+        } catch (e) {
+          throw e;
         }
       },
     })

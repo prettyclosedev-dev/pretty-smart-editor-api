@@ -196,6 +196,11 @@ export const Query = queryType({
           const completion = await openai.createChatCompletion({
             model: "gpt-4",
             messages,
+            temperature: 0.7,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            max_tokens: 2048,
           });
           return completion.data.choices[0].message;
         } catch (e) {

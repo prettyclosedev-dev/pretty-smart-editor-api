@@ -13,15 +13,17 @@ import {
   isAuthenticated,
   searchProcessesAsync,
 } from '../utils'
+import * as fs from 'fs'
+import * as path from 'path'
 
-import { Configuration, OpenAIApi } from "openai";
+import { Configuration, OpenAIApi } from 'openai'
 
-const OPENAI_API_KEY = "REMOVED_OPENAI_KEY";
+const OPENAI_API_KEY = 'REMOVED_OPENAI_KEY'
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+})
+const openai = new OpenAIApi(configuration)
 
 require('dotenv').config()
 
@@ -55,7 +57,7 @@ export const Query = queryType({
       },
     })
 
-    t.crud.design()
+    t.crud.design() // mutate logo and colors and watermark based on requesting user's branding (or do on client side)
     t.crud.designs({ filtering: true, ordering: true, pagination: true })
     t.nullable.field('designsCount', {
       type: 'Int',
@@ -83,6 +85,20 @@ export const Query = queryType({
       },
     })
 
+    t.crud.template()
+    t.crud.templates({ filtering: true, ordering: true, pagination: true })
+    t.nullable.field('templatesCount', {
+      type: 'Int',
+      args: {
+        where: 'TemplateWhereInput',
+      },
+      resolve: (parent, args, ctx) => {
+        return ctx.prisma.template.count({
+          where: args.where,
+        })
+      },
+    })
+
     t.crud.user()
     t.crud.users({ filtering: true, ordering: true, pagination: true })
     t.nullable.field('usersCount', {
@@ -100,16 +116,16 @@ export const Query = queryType({
     t.nullable.field('jsonToImageBase64', {
       type: 'String',
       args: {
-        designJson: "Json",
-        attrs: "Json"
+        designJson: 'Json',
+        attrs: 'Json',
       },
-      resolve: async (parent, {designJson, attrs}, ctx) => {
+      resolve: async (parent, { designJson, attrs }, ctx) => {
         try {
-          const {jsonToImageBase64} = require("../../polotno/preview")
+          const { jsonToImageBase64 } = require('../../polotno/preview')
           const data = await jsonToImageBase64(designJson, attrs)
-          return data;
+          return data
         } catch (e) {
-          throw e;
+          throw e
         }
       },
     })
@@ -117,21 +133,24 @@ export const Query = queryType({
     t.nullable.field('designToImageBase64', {
       type: 'String',
       args: {
-        designId: "Int",
-        attrs: "Json"
+        designId: 'Int',
+        attrs: 'Json',
       },
-      resolve: async (parent, {designId, attrs}, ctx) => {
+      resolve: async (parent, { designId, attrs }, ctx) => {
         try {
-          const designJson = await ctx.prisma.design.findUnique({where: {id: designId}, include: {pages: true}})
+          const designJson = await ctx.prisma.design.findUnique({
+            where: { id: designId },
+            include: { pages: true },
+          })
           if (!designJson) {
-            throw new Error("No design found for the id provided.")
+            throw new Error('No design found for the id provided.')
           }
 
-          const {jsonToImageBase64} = require("../../polotno/preview")
+          const { jsonToImageBase64 } = require('../../polotno/preview')
           const data = await jsonToImageBase64(designJson, attrs)
-          return data;
+          return data
         } catch (e) {
-          throw e;
+          throw e
         }
       },
     })
@@ -139,49 +158,61 @@ export const Query = queryType({
     t.nullable.field('designPreview', {
       type: 'String',
       args: {
-        designJson: nullable("Json"),
-        designId: nullable("Int"),
-        mimeType: "String", // png, jpg, pdf, svg?
-        dataType: "String", // base64, dataURL
-        args: nullable("Json"),
+        designJson: nullable('Json'),
+        designId: nullable('Int'),
+        mimeType: 'String', // png, jpg, pdf, svg?
+        dataType: 'String', // base64, dataURL
+        args: nullable('Json'),
       },
-      resolve: async (parent, {designJson, designId, mimeType, dataType, args}, ctx) => {
+      resolve: async (
+        parent,
+        { designJson, designId, mimeType, dataType, args },
+        ctx,
+      ) => {
         if (designJson || !!designId) {
           if (!designJson && !!designId) {
-            const design = await ctx.prisma.design.findUnique({where: {id: designId}, include: {pages: true}})
+            const design = await ctx.prisma.design.findUnique({
+              where: { id: designId },
+              include: { pages: true },
+            })
             if (design) {
               designJson = design
             } else {
-              throw new Error("No design found for the id provided.")
+              throw new Error('No design found for the id provided.')
             }
           }
 
           if (!designJson) {
-            throw new Error("No designJson provided.")
+            throw new Error('No designJson provided.')
           }
 
           try {
-            const {jsonToImageBase64, jsonToDataURL, jsonToPDFBase64, jsonToPDFDataURL} = require("../../polotno/preview")
-            let data;
-            if (mimeType === "pdf") {
-              if (dataType === "base64") {
+            const {
+              jsonToImageBase64,
+              jsonToDataURL,
+              jsonToPDFBase64,
+              jsonToPDFDataURL,
+            } = require('../../polotno/preview')
+            let data
+            if (mimeType === 'pdf') {
+              if (dataType === 'base64') {
                 data = await jsonToPDFBase64(designJson, args)
               } else {
                 data = await jsonToPDFDataURL(designJson, args)
               }
             } else {
-              if (dataType === "base64") {
+              if (dataType === 'base64') {
                 data = await jsonToImageBase64(designJson, args)
               } else {
                 data = await jsonToDataURL(designJson, args)
               }
             }
-            return data;
+            return data
           } catch (e) {
-            throw e;
+            throw e
           }
         } else {
-          throw new Error("No designJson or designId provided.")
+          throw new Error('No designJson or designId provided.')
         }
       },
     })
@@ -189,22 +220,80 @@ export const Query = queryType({
     t.nullable.field('chatGPT', {
       type: 'Json',
       args: {
-        messages: "Json",
+        messages: 'Json',
+        model: nullable('String'),
+        temperature: nullable('Float'),
+        top_p: nullable('Float'),
+        frequency_penalty: nullable('Float'),
+        presence_penalty: nullable('Float'),
+        max_tokens: nullable('Int'),
       },
-      resolve: async (parent, {messages}, ctx) => {
+      resolve: async (
+        parent,
+        {
+          messages,
+          model,
+          temperature,
+          top_p,
+          frequency_penalty,
+          presence_penalty,
+          max_tokens,
+        },
+        ctx,
+      ) => {
         try {
+          const filePath = path.join(__dirname, '../../src/assets/system-role.txt')
+          const systemRoleContent = await fs.promises.readFile(filePath, 'utf8')
+
+          const modifiedMessages = [
+            {
+              role: 'system',
+              content: systemRoleContent,
+            },
+            ...messages,
+          ]
+
           const completion = await openai.createChatCompletion({
-            model: "gpt-4",
-            messages,
-            temperature: 0.7,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-            max_tokens: 2048,
-          });
-          return completion.data.choices[0].message;
+            model: model || 'gpt-4',
+            messages: modifiedMessages,
+            temperature: temperature || 0.7,
+            top_p: top_p || 1,
+            frequency_penalty: frequency_penalty || 0,
+            presence_penalty: presence_penalty || 0,
+            max_tokens: max_tokens || 2048,
+          })
+          return completion.data.choices[0].message
         } catch (e) {
-          throw e;
+          throw e
+        }
+      },
+    })
+
+    t.nullable.field('unsplash', {
+      type: 'Json',
+      args: {
+        query: 'String',
+        color: nullable('String'),
+        orientation: nullable('String'),
+      },
+      resolve: async (parent, { query, color, orientation }, ctx) => {
+        const apiKey = 'REMOVED_UNSPLASH_KEY'
+        let apiUrl = `https://api.unsplash.com/search/photos?query=${query}&page=1&per_page=1&client_id=${apiKey}`
+
+        if (color) {
+          apiUrl += `&color=${color}`
+        }
+
+        if (orientation) {
+          apiUrl += `&orientation=${orientation}`
+        }
+
+        try {
+          const response = await fetch(apiUrl)
+          const data = await response.json()
+          return data
+        } catch (e) {
+          throw e
         }
       },
     })

@@ -66,3 +66,20 @@ model Design {
   user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int?
 }
+
+model Template {
+  id            Int       @id @default(autoincrement())
+  name          String
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    Int?
+  publishedDate DateTime  @default(now())
+  editedDate    DateTime  @default(now())
+  width         Int
+  height        Int
+  html          String
+  preview       String
+  public        Boolean?  @default(false)
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int?
+  description   String
+}

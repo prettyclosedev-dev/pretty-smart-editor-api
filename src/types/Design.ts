@@ -17,6 +17,7 @@ export const Design = objectType({
     t.model.editedDate()
     t.model.category()
     t.model.user()
+    t.model.public()
   },
 })
 
@@ -26,5 +27,23 @@ export const Category = objectType({
     t.model.id()
     t.model.name()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
+  },
+})
+
+export const Template = objectType({
+  name: 'Template',
+  definition(t) {
+    t.model.id()
+    t.model.name()
+    t.model.preview()
+    t.model.width()
+    t.model.height()
+    t.model.publishedDate()
+    t.model.editedDate()
+    t.model.category()
+    t.model.user()
+    t.model.html()
+    t.model.public()
+    t.model.description()
   },
 })

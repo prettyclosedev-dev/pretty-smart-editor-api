@@ -901,6 +901,7 @@ type Query {
   categories(cursor: CategoryWhereUniqueInput, orderBy: [CategoryOrderByWithRelationInput!], skip: Int, take: Int, where: CategoryWhereInput): [Category!]!
   categoriesCount(where: CategoryWhereInput): Int
   category(where: CategoryWhereUniqueInput!): Category
+  chatGPT(frequency_penalty: Float, max_tokens: Int, messages: Json, model: String, presence_penalty: Float, temperature: Float, top_p: Float): Json
   client(where: ClientWhereUniqueInput!): Client
   clients(cursor: ClientWhereUniqueInput, orderBy: [ClientOrderByWithRelationInput!], skip: Int, take: Int, where: ClientWhereInput): [Client!]!
   clientsCount(where: ClientWhereInput): Int
@@ -913,6 +914,7 @@ type Query {
   page(where: PageWhereUniqueInput!): Page
   pages(cursor: PageWhereUniqueInput, orderBy: [PageOrderByWithRelationInput!], skip: Int, take: Int, where: PageWhereInput): [Page!]!
   pagesCount(where: PageWhereInput): Int
+  unsplash(color: String, orientation: String, query: String): Json
   user(where: UserWhereUniqueInput!): User
   users(cursor: UserWhereUniqueInput, orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
   usersCount(where: UserWhereInput): Int

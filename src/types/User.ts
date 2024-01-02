@@ -6,6 +6,9 @@ export const User = objectType({
     t.model.id()
     t.model.name()
     t.model.email()
+    t.model.role()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
+    t.model.templates({ ordering: true, filtering: true, pagination: true })
+    t.model.brands({ ordering: true, filtering: true, pagination: true })
   },
 })

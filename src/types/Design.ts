@@ -26,6 +26,8 @@ export const Category = objectType({
   definition(t) {
     t.model.id()
     t.model.name()
+    t.model.creator()
+    t.model.public()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
   },
 })

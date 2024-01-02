@@ -22,11 +22,51 @@ enum UserRole {
 }
 
 model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String?    @unique
+  designs   Design[]
+  role      UserRole   @default(VIEWER)
+  Category  Category[]
+  templates Template[]
+  brands    Brand[]
+}
+
+model Color {
   id      Int      @id @default(autoincrement())
-  name    String
-  email   String?  @unique
-  designs Design[]
-  role    UserRole @default(ADMIN)
+  value   String
+  primary Boolean? @default(false)
+  rank    Int?
+  brand   Brand?   @relation(fields: [brandId], references: [id])
+  brandId Int?
+}
+
+model Font {
+  id      Int      @id @default(autoincrement())
+  name    String?
+  value   String?
+  url     String?
+  italic  Boolean? @default(false)
+  bold    Boolean? @default(false)
+  google  Boolean? @default(false)
+  brand   Brand?   @relation(fields: [brandId], references: [id])
+  brandId Int?
+}
+
+model Brand {
+  id       Int     @id @default(autoincrement())
+  name     String
+  tagline  String?
+  industry String?
+  email    String? @unique
+  phone    String?
+  colors   Color[]
+  fonts    Font[]
+  logo     String
+  wordmark String
+  icon     String
+  User     User?   @relation(fields: [userId], references: [id])
+  userId   Int?
 }
 
 model Page {
@@ -42,9 +82,13 @@ model Page {
 }
 
 model Category {
-  id      Int      @id @default(autoincrement())
-  name    String
-  designs Design[]
+  id       Int        @id @default(autoincrement())
+  name     String
+  creator  User?      @relation(fields: [userId], references: [id])
+  public   Boolean?   @default(false)
+  designs  Design[]
+  userId   Int?
+  Template Template[]
 }
 
 model Design {

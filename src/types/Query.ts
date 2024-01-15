@@ -7,6 +7,7 @@ import {
   nonNull,
   inputObjectType,
   nullable,
+  list,
 } from 'nexus'
 import {
   getCustomTokenForUserByEmail,
@@ -17,6 +18,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import { Configuration, OpenAIApi } from 'openai'
+import { updateDesignWithBrand } from '../design.utils'
 
 const OPENAI_API_KEY = 'REMOVED_OPENAI_KEY'
 
@@ -59,6 +61,58 @@ export const Query = queryType({
 
     t.crud.design() // mutate logo and colors and watermark based on requesting user's branding (or do on client side)
     t.crud.designs({ filtering: true, ordering: true, pagination: true })
+    t.nullable.field('brandedDesigns', {
+      type: list('Json'),
+      args: {
+        where: 'DesignWhereInput',
+        take: nullable('Int'),
+        skip: nullable('Int'),
+        orderBy: 'DesignOrderByWithRelationInput',
+        cursor: 'DesignWhereUniqueInput',
+        email: nonNull('String'),
+      },
+      resolve: async (parent, args, ctx) => {
+        try {
+          const designs = await ctx.prisma.design.findMany({
+            where: args.where,
+            take: args.take,
+            orderBy: args.orderBy,
+            skip: args.skip,
+            cursor: args.cursor,
+            include: {
+              pages: true,
+            },
+          })
+          const user = await ctx.prisma.user.findUnique({
+            where: {
+              email: args.email,
+            },
+            include: {
+              brands: {
+                include: {
+                  colors: true,
+                  fonts: true,
+                },
+              },
+            },
+          })
+          if (!user) {
+            throw new Error('No user found for the email provided.')
+          }
+          const brand = user.brands?.[0]
+          if (!brand) {
+            throw new Error('No brand found for the user provided.')
+          }
+          const updatedDesigns = await Promise.all(
+            designs.map(async design => await updateDesignWithBrand(design, brand))
+          );
+          console.log('updatedDesigns', JSON.stringify(updatedDesigns?.[0]?.pages?.[0]?.children))
+          return updatedDesigns;
+        } catch (e) {
+          throw e
+        }
+      },
+    })
     t.nullable.field('designsCount', {
       type: 'Int',
       args: {
@@ -108,6 +162,20 @@ export const Query = queryType({
       },
       resolve: (parent, args, ctx) => {
         return ctx.prisma.user.count({
+          where: args.where,
+        })
+      },
+    })
+
+    t.crud.brand()
+    t.crud.brands({ filtering: true, ordering: true, pagination: true })
+    t.nullable.field('brandsCount', {
+      type: 'Int',
+      args: {
+        where: 'BrandWhereInput',
+      },
+      resolve: (parent, args, ctx) => {
+        return ctx.prisma.brand.count({
           where: args.where,
         })
       },
@@ -242,7 +310,10 @@ export const Query = queryType({
         ctx,
       ) => {
         try {
-          const filePath = path.join(__dirname, '../../src/assets/system-role.txt')
+          const filePath = path.join(
+            __dirname,
+            '../../src/assets/system-role.txt',
+          )
           const systemRoleContent = await fs.promises.readFile(filePath, 'utf8')
 
           const modifiedMessages = [

@@ -1,6 +1,6 @@
 import { Prisma, PrismaPromise } from '@prisma/client'
 import { list, mutationType, nonNull, nullable, stringArg } from 'nexus'
-import { importUser, searchProcessesAsync, startImportProcessAsync } from '../utils'
+import { importUser, searchProcessesAsync, startImportProcessAsync } from '../utils/general'
 
 export const Mutation = mutationType({
   definition(t) {

@@ -14,8 +14,8 @@ import {
   getCustomTokenForUserByEmail,
   isAuthenticated,
   searchProcessesAsync,
-} from '../utils'
-import { updateDesignWithBrand } from '../design.utils'
+} from '../utils/general'
+import { updateDesignWithBrand } from '../utils/design/design.utils'
 
 import * as fs from 'fs'
 import * as path from 'path'

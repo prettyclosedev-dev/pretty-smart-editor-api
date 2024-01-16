@@ -1,5 +1,5 @@
 import { Client } from '@prisma/client'
-import { Context } from './context'
+import { Context } from '../context'
 
 require('dotenv').config()
 

@@ -9,23 +9,23 @@ import {
   nullable,
   list,
 } from 'nexus'
+
 import {
   getCustomTokenForUserByEmail,
   isAuthenticated,
   searchProcessesAsync,
 } from '../utils'
+import { updateDesignWithBrand } from '../design.utils'
+
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { Configuration, OpenAIApi } from 'openai'
-import { updateDesignWithBrand } from '../design.utils'
+import { createInstance } from 'polotno-node';
 
-const OPENAI_API_KEY = 'REMOVED_OPENAI_KEY'
-
-const configuration = new Configuration({
-  apiKey: OPENAI_API_KEY,
+import OpenAI from 'openai';
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 })
-const openai = new OpenAIApi(configuration)
 
 require('dotenv').config()
 
@@ -59,7 +59,49 @@ export const Query = queryType({
       },
     })
 
-    t.crud.design() // mutate logo and colors and watermark based on requesting user's branding (or do on client side)
+    t.crud.design()
+    t.nullable.field('brandedDesign', {
+      type: 'Json',
+      args: {
+        where: 'DesignWhereUniqueInput',
+        email: nonNull('String'),
+        brandWhere: nullable('BrandWhereUniqueInput'),
+      },
+      resolve: async (parent, args, ctx) => {
+        try {
+          const design = await ctx.prisma.design.findUnique({
+            where: args.where,
+            include: {
+              pages: true,
+            },
+          })
+          const user = await ctx.prisma.user.findUnique({
+            where: {
+              email: args.email,
+            },
+            include: {
+              brands: {
+                include: {
+                  colors: true,
+                  fonts: true,
+                },
+              },
+            },
+          })
+          if (!user) {
+            throw new Error('No user found for the email provided.')
+          }
+          const brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          if (!brand) {
+            throw new Error('No brand found for the user provided.')
+          }
+          const updatedDesign = await updateDesignWithBrand(design, brand);
+          return updatedDesign;
+        } catch (e) {
+          throw e
+        }
+      },
+    })
     t.crud.designs({ filtering: true, ordering: true, pagination: true })
     t.nullable.field('brandedDesigns', {
       type: list('Json'),
@@ -70,6 +112,7 @@ export const Query = queryType({
         orderBy: 'DesignOrderByWithRelationInput',
         cursor: 'DesignWhereUniqueInput',
         email: nonNull('String'),
+        brandWhere: nullable('BrandWhereUniqueInput'),
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -99,14 +142,13 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
-          const brand = user.brands?.[0]
+          const brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
             designs.map(async design => await updateDesignWithBrand(design, brand))
           );
-          console.log('updatedDesigns', JSON.stringify(updatedDesigns?.[0]?.pages?.[0]?.children))
           return updatedDesigns;
         } catch (e) {
           throw e
@@ -189,8 +231,10 @@ export const Query = queryType({
       },
       resolve: async (parent, { designJson, attrs }, ctx) => {
         try {
-          const { jsonToImageBase64 } = require('../../polotno/preview')
-          const data = await jsonToImageBase64(designJson, attrs)
+          const instance = await createInstance({
+            key: process.env.POLOTNO_KEY,
+          });
+          const data = await instance.jsonToImageBase64(designJson, attrs)
           return data
         } catch (e) {
           throw e
@@ -214,8 +258,10 @@ export const Query = queryType({
             throw new Error('No design found for the id provided.')
           }
 
-          const { jsonToImageBase64 } = require('../../polotno/preview')
-          const data = await jsonToImageBase64(designJson, attrs)
+          const instance = await createInstance({
+            key: process.env.POLOTNO_KEY,
+          });
+          const data = await instance.jsonToImageBase64(designJson, attrs)
           return data
         } catch (e) {
           throw e
@@ -255,24 +301,21 @@ export const Query = queryType({
           }
 
           try {
-            const {
-              jsonToImageBase64,
-              jsonToDataURL,
-              jsonToPDFBase64,
-              jsonToPDFDataURL,
-            } = require('../../polotno/preview')
+            const instance = await createInstance({
+              key: process.env.POLOTNO_KEY,
+            });
             let data
             if (mimeType === 'pdf') {
               if (dataType === 'base64') {
-                data = await jsonToPDFBase64(designJson, args)
+                data = await instance.jsonToPDFBase64(designJson, args)
               } else {
-                data = await jsonToPDFDataURL(designJson, args)
+                data = await instance.jsonToPDFDataURL(designJson, args)
               }
             } else {
               if (dataType === 'base64') {
-                data = await jsonToImageBase64(designJson, args)
+                data = await instance.jsonToImageBase64(designJson, args)
               } else {
-                data = await jsonToDataURL(designJson, args)
+                data = await instance.jsonToDataURL(designJson, args)
               }
             }
             return data

@@ -25,7 +25,7 @@ export async function isAuthenticated(
   const origin = context.req.get('origin')
   if (checkIp && !origin) return false
 
-  try {
+  try { // test for client_token
     let client = await context.prisma.client.findUnique({ where: { token } })
     return (client && !checkIp) || (client && origin === client.ip)
   } catch (err) {

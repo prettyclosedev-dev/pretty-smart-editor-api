@@ -54,19 +54,20 @@ model Font {
 }
 
 model Brand {
-  id       Int     @id @default(autoincrement())
-  name     String
-  tagline  String?
-  industry String?
-  email    String? @unique
-  phone    String?
-  colors   Color[]
-  fonts    Font[]
-  logo     String
-  wordmark String
-  icon     String
-  User     User?   @relation(fields: [userId], references: [id])
-  userId   Int?
+  id                Int        @id @default(autoincrement())
+  name              String
+  tagline           String?
+  industry          String?
+  email             String?    @unique
+  phone             String?
+  colors            Color[]
+  fonts             Font[]
+  logo              String
+  wordmark          String
+  icon              String
+  user              User?      @relation(fields: [userId], references: [id])
+  userId            Int?
+  specialCategories Category[] @relation("CategoriesBrandRelation")
 }
 
 model Page {
@@ -82,48 +83,50 @@ model Page {
 }
 
 model Category {
-  id       Int        @id @default(autoincrement())
-  name     String
-  creator  User?      @relation(fields: [userId], references: [id])
-  public   Boolean?   @default(false)
-  designs  Design[]
-  userId   Int?
-  Template Template[]
+  id                 Int        @id @default(autoincrement())
+  name               String
+  creator            User?      @relation(fields: [creatorId], references: [id])
+  creatorId          Int?
+  public             Boolean?   @default(false)
+  designs            Design[]
+  templates          Template[]
+  tags               String[]
+  availableForBrands Brand[]    @relation("CategoriesBrandRelation")
 }
 
 model Design {
-  id            Int       @id @default(autoincrement())
-  polotnoId     String?   @unique
+  id            Int        @id @default(autoincrement())
+  polotnoId     String?    @unique
   name          String
   preview       String
   pages         Page[]
   width         Int
   height        Int
   fonts         String[]
-  unit          String    @default("px")
-  dpi           Int       @default(72)
-  publishedDate DateTime  @default(now())
-  editedDate    DateTime  @default(now())
-  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId    Int?
-  public        Boolean?  @default(false)
-  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int?
+  unit          String     @default("px")
+  dpi           Int        @default(72)
+  publishedDate DateTime   @default(now())
+  editedDate    DateTime   @default(now())
+  categories    Category[]
+  public        Boolean?   @default(false)
+  creator       User?      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId     Int?
+  tags          String[]
 }
 
 model Template {
-  id            Int       @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   name          String
-  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId    Int?
-  publishedDate DateTime  @default(now())
-  editedDate    DateTime  @default(now())
+  categories    Category[]
+  publishedDate DateTime   @default(now())
+  editedDate    DateTime   @default(now())
   width         Int
   height        Int
   html          String
   preview       String
-  public        Boolean?  @default(false)
-  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int?
+  public        Boolean?   @default(false)
+  creator       User?      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId     Int?
   description   String
+  tags          String[]
 }

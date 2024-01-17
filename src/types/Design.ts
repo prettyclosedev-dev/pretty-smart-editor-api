@@ -15,9 +15,10 @@ export const Design = objectType({
     t.model.dpi()
     t.model.publishedDate()
     t.model.editedDate()
-    t.model.category()
-    t.model.user()
+    t.model.categories({ ordering: true, filtering: true, pagination: true })
+    t.model.creator()
     t.model.public()
+    t.model.tags()
   },
 })
 
@@ -29,6 +30,9 @@ export const Category = objectType({
     t.model.creator()
     t.model.public()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
+    t.model.templates({ ordering: true, filtering: true, pagination: true })
+    t.model.tags()
+    t.model.availableForBrands({ ordering: true, filtering: true, pagination: true })
   },
 })
 
@@ -42,10 +46,11 @@ export const Template = objectType({
     t.model.height()
     t.model.publishedDate()
     t.model.editedDate()
-    t.model.category()
-    t.model.user()
+    t.model.categories({ ordering: true, filtering: true, pagination: true })
+    t.model.creator()
     t.model.html()
     t.model.public()
     t.model.description()
+    t.model.tags()
   },
 })

@@ -14,6 +14,8 @@ export const Brand = objectType({
     t.model.icon()
     t.model.tagline()
     t.model.industry()
+    t.model.user()
+    t.model.specialCategories({ ordering: true, filtering: true, pagination: true })
   },
 })
 

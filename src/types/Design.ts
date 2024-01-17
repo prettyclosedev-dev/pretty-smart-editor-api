@@ -19,6 +19,7 @@ export const Design = objectType({
     t.model.creator()
     t.model.public()
     t.model.tags()
+    t.model.availableForBrands({ ordering: true, filtering: true, pagination: true })
   },
 })
 

@@ -23,6 +23,9 @@ import * as path from 'path'
 import { createInstance } from 'polotno-node';
 
 import OpenAI from 'openai';
+
+require('dotenv').config()
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
@@ -66,6 +69,7 @@ export const Query = queryType({
         where: 'DesignWhereUniqueInput',
         email: nonNull('String'),
         brandWhere: nullable('BrandWhereUniqueInput'),
+        withPreview: nullable('Boolean'),
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -95,7 +99,7 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
-          const updatedDesign = await updateDesignWithBrand(design, brand);
+          const updatedDesign = await updateDesignWithBrand(design, brand, args.withPreview);
           return updatedDesign;
         } catch (e) {
           throw e
@@ -113,6 +117,7 @@ export const Query = queryType({
         cursor: 'DesignWhereUniqueInput',
         email: nonNull('String'),
         brandWhere: nullable('BrandWhereUniqueInput'),
+        withPreview: nullable('Boolean'),
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -147,7 +152,7 @@ export const Query = queryType({
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
-            designs.map(async design => await updateDesignWithBrand(design, brand))
+            designs.map(async design => await updateDesignWithBrand(design, brand, args.withPreview))
           );
           return updatedDesigns;
         } catch (e) {

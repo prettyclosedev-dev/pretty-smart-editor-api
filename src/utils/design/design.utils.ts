@@ -1,12 +1,26 @@
 import { updateImageAttributes } from "./svg.utils"
 import { buildFontVariants, getDynamicFontSize, replacePlaceholders, updateFontStyle } from "./text.utils"
 
-const { createCanvas, registerFont } = require('canvas')
+import * as fs from 'fs'
+import * as path from 'path'
 
-export async function updateDesignWithBrand(design, brand) {
+import { createInstance } from 'polotno-node';
+
+require('dotenv').config()
+
+export async function updateDesignWithBrand(design, brand, withPreview) {
   for (const page of design.pages) {
-    await Promise.all(page.children.map((child) => processChild(child, brand)))
+    await Promise.all(page.children.map((child) => processChild(child, brand, withPreview)))
   }
+  
+  if (withPreview) {
+    const instance = await createInstance({
+      key: process.env.POLOTNO_KEY,
+    });
+    const data = await instance.jsonToImageBase64(design, {})
+    design.preview = data
+  }
+
   return design
 }
 
@@ -35,7 +49,7 @@ export async function processChild(child, brand) {
 
   if (child.children) {
     child.children.forEach((nestedChild) => {
-      processChild(nestedChild, brand)
+      processChild(nestedChild, brand, withPreview)
     })
   }
 }

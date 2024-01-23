@@ -108,6 +108,6 @@ export const permissions = shield(
     },
   },
   {
-    debug: false,
+    debug: true,
   },
 )

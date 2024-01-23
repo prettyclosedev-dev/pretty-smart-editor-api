@@ -78,6 +78,7 @@ model Page {
   width      String  @default("auto")
   height     String  @default("auto")
   background String
+  duration   Int?
   bleed      Int
   design     Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
   designId   Int

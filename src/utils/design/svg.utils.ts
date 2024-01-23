@@ -31,6 +31,16 @@ export async function fetchAndSetImage(attribute, srcUrl, child) {
   }
 }
 
+export async function fetchImage(srcUrl) {
+  try {
+    const response = await fetch(srcUrl)
+    const svgText = await response.text()
+    return svgText
+  } catch (error) {
+    console.error('Error fetching image:', error)
+  }
+}
+
 export function replaceSvgSetting(svg, key, val) {
   let newSvg = svg
   if (svg.indexOf(key) > -1) {
@@ -54,6 +64,55 @@ function removeWhiteSpace(svg) {
   let regex = new RegExp(`viewBox=".*?"`, 'g')
   newSvg = svg.replace(regex, `viewBox="8.8 13.99 85.88 70.36"`)
   return newSvg
+}
+
+function updateSvgDimensions(svg, newWidth, newHeight = null) {
+  return svg;
+  console.log("\n\noriginal, newWidth===\n\n", newWidth, newHeight, svg)
+  // Try to extract the current width and height directly from the attributes
+  const widthMatch = svg.match(/width="([\d.]+)"/);
+  const heightMatch = svg.match(/height="([\d.]+)"/);
+
+  let currentWidth = widthMatch ? parseFloat(widthMatch[1]) : null;
+  let currentHeight = heightMatch ? parseFloat(heightMatch[1]) : null;
+
+  // If width and height are not found in attributes, try viewBox
+  if (currentWidth === null || currentHeight === null) {
+    const viewBoxMatch = svg.match(/viewBox="\d+\s+\d+\s+([\d.]+)\s+([\d.]+)"/);
+    currentWidth = viewBoxMatch ? parseFloat(viewBoxMatch[1]) : 0;
+    currentHeight = viewBoxMatch ? parseFloat(viewBoxMatch[2]) : 0;
+  }
+
+  // Calculate the aspect ratio
+  const aspectRatio = currentWidth / currentHeight;
+
+  // Calculate new dimensions while maintaining aspect ratio
+  if (newWidth !== undefined && newWidth !== null) {
+    newHeight = newWidth / aspectRatio;
+  } else if (newHeight !== undefined && newHeight !== null) {
+    newWidth = newHeight * aspectRatio;
+  }
+
+  // Replace or add width and height attributes
+  // svg = replaceOrAddAttribute(svg, 'width', newWidth); // .toFixed(2)
+  // svg = replaceOrAddAttribute(svg, 'preserveAspectRatio', "xMidYMid meet"); // .toFixed(2)
+  // svg = replaceOrAddAttribute(svg, 'height', newHeight); // .toFixed(2)
+  svg = replaceOrAddAttribute(svg, 'style', "width: " + newWidth + "; height: " + newHeight + ";"); // .toFixed(2)
+
+  // Replace or add viewBox attribute
+  // svg = replaceOrAddAttribute(svg, 'viewBox', `0 0 ${newWidth.toFixed(2)} ${newHeight.toFixed(2)}`);
+  console.log("\n\nupdated===\n\n", svg, newHeight)
+  return svg;
+}
+
+// Function to replace or add an attribute
+function replaceOrAddAttribute(svg, attrName, attrValue) {
+  const attrRegex = new RegExp(`${attrName}="[^"]*"`);
+  if (svg.match(attrRegex)) {
+    return svg.replace(attrRegex, `${attrName}="${attrValue}"`);
+  } else {
+    return svg.replace('<svg', `<svg ${attrName}="${attrValue}"`);
+  }
 }
 
 function getColor(
@@ -281,7 +340,7 @@ async function getOptimizedSVG(svg, brand) {
   if (allWhite) {
     svg = svg.replace(
       fills,
-      `fill="${(brand && brand.colors && brand.colors.primary) || '000000'}"`,
+      `fill="${(findColorByPrimary(brand, true)) || '000000'}"`,
     )
   }
 
@@ -306,38 +365,38 @@ function findColorByPrimary(brand, isPrimary) {
 }
 
 export async function updateImageAttributes(child, brand) {
-  const elementColorSchemeMatch = child.name.match(/^\{(\w+)(?:_(\w+))?}$/)
-  if (!elementColorSchemeMatch) return // Exit if the name doesn't match the pattern
+  const elementColorSchemeMatch = child.name.match(/^\{(\w+?)(?:_(.+))?}$/);
+  if (!elementColorSchemeMatch) return;
 
-  const elementType = elementColorSchemeMatch[1]
-  const colorScheme = elementColorSchemeMatch[2]
+  const elementType = elementColorSchemeMatch[1];
+  const colorScheme = elementColorSchemeMatch[2];
+
+  var mutateColors = false;
+
+  var fetchedAsset;
 
   // Update the src attribute based on the name of the element
-  switch (elementType) {
-    case 'logo':
-    case 'icon':
-    case 'wordmark':
-      if (brand[elementType]) {
-        if (/^https?:\/\//.test(brand[elementType])) {
-          await fetchAndSetImage('src', brand[elementType], child)
-        } else {
-          child.src = brand[elementType]
-        }
-      }
-      break
-    default:
-      // Handle other cases or leave as is
-      break
+  if (['logo', 'icon', 'wordmark'].includes(elementType) && brand[elementType]) {
+    if (/^https?:\/\//.test(brand[elementType])) {
+      fetchedAsset = await fetchImage(brand[elementType]);
+    } else {
+      child.src = brand[elementType];
+    }
+    mutateColors = true;
   }
 
   // Handle SVG color replacement
   if (
+    mutateColors &&
     child.type === 'svg' &&
     child.colorsReplace &&
-    Array.isArray(brand.colors)
+    Array.isArray(brand.colors) &&
+    fetchedAsset?.length
   ) {
     // Determine colors based on colorScheme
     let colorsToApply = []
+    let fillColorToApply = '#ffffff'
+
     if (colorScheme) {
       switch (colorScheme) {
         case 'primary_on_secondary':
@@ -345,54 +404,85 @@ export async function updateImageAttributes(child, brand) {
             findColorByPrimary(brand, true),
             findColorByPrimary(brand, false),
           ]
+          fillColorToApply = getColor(brand, 'primary', 'secondary')
           break
         case 'secondary_on_primary':
           colorsToApply = [
             findColorByPrimary(brand, false),
             findColorByPrimary(brand, true),
           ]
+          fillColorToApply = getColor(brand, 'secondary', 'primary')
           break
         case 'primary_on_black':
           colorsToApply = [findColorByPrimary(brand, true), '#000000']
+          fillColorToApply = getColor(brand, 'primary', 'black')
           break
         case 'primary_on_white':
           colorsToApply = [findColorByPrimary(brand, true), '#ffffff']
+          fillColorToApply = getColor(brand, 'primary', 'white')
           break
         case 'secondary_on_black':
           colorsToApply = [findColorByPrimary(brand, false), '#000000']
+          fillColorToApply = getColor(brand, 'secondary', 'black')
           break
         case 'secondary_on_white':
           colorsToApply = [findColorByPrimary(brand, false), '#ffffff']
+          fillColorToApply = getColor(brand, 'secondary', 'white')
           break
         case 'white':
           colorsToApply = ['#ffffff']
           break
         case 'black':
           colorsToApply = ['#000000']
+          fillColorToApply = '#000000'
           break
-        // Add additional cases here as needed
+        case 'light_color':
+          fillColorToApply = getLighterColor(brand, 'primary', 'secondary')
+          break
+        case 'dark_color':
+          fillColorToApply = getDarkerColor(brand, 'primary', 'secondary')
+          break
+        case 'primary':
+          fillColorToApply = findColorByPrimary(brand, true)
+          break
+        case 'secondary':
+          fillColorToApply = findColorByPrimary(brand, false)
+          break
         default:
           break
       }
     }
 
-    if (!colorsToApply.length) {
-      // Sort brand colors by rank, ensuring primary color is first
-      const sortedColors = brand.colors.slice().sort((a, b) => {
-        if (a.primary) return -1
-        if (b.primary) return 1
-        return (a.rank || 0) - (b.rank || 0)
-      })
+    let replaceFill = replaceSvgSetting(fetchedAsset, 'fill', fillColorToApply)
+    let replaceStroke = replaceSvgSetting(
+      replaceFill,
+      'stroke',
+      fillColorToApply,
+    )
+    // replace width height
+    const optimized = await getOptimizedSVG(replaceStroke, brand)
+    const resized = updateSvgDimensions(optimized, child.width); // child.height
+    const base64EncodedSvg = btoa(resized)
 
-      // Apply sorted colors to the SVG
-      colorsToApply = sortedColors.map((color) => color.value)
-    }
+    child.src = `data:image/svg+xml;base64,${base64EncodedSvg}`
 
-    // Apply colors to the SVG
-    Object.keys(child.colorsReplace).forEach((colorKey, index) => {
-      if (colorsToApply[index]) {
-        child.colorsReplace[colorKey] = colorsToApply[index]
-      }
-    })
+    // if (!colorsToApply.length) {
+    //   // Sort brand colors by rank, ensuring primary color is first
+    //   const sortedColors = brand.colors.slice().sort((a, b) => {
+    //     if (a.primary) return -1
+    //     if (b.primary) return 1
+    //     return (a.rank || 0) - (b.rank || 0)
+    //   })
+
+    //   // Apply sorted colors to the SVG
+    //   colorsToApply = sortedColors.map((color) => color.value)
+    // }
+
+    // // Apply colors to the SVG
+    // Object.keys(child.colorsReplace).forEach((colorKey, index) => {
+    //   if (colorsToApply[index]) {
+    //     child.colorsReplace[colorKey] = colorsToApply[index]
+    //   }
+    // })
   }
 }

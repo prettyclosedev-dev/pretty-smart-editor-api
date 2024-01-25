@@ -4,6 +4,7 @@ export const Brand = objectType({
   name: 'Brand',
   definition(t) {
     t.model.id()
+    t.model.prettySmartId()
     t.model.name()
     t.model.email()
     t.model.phone()

@@ -55,6 +55,7 @@ model Font {
 
 model Brand {
   id                Int        @id @default(autoincrement())
+  prettySmartId     String?    @unique
   name              String
   tagline           String?
   industry          String?

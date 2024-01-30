@@ -1,9 +1,14 @@
 const { createCanvas, registerFont } = require('canvas')
 
-export function replacePlaceholders(text, brand) {
+export function replacePlaceholders(text, brand) { // add mortgage and other text placeholders
   return text.replace(/\{(\w+)\}/g, (match, key) => {
-    return brand[key] || match
-  })
+    for (let brandKey in brand) {
+      if (key.includes(brandKey)) {
+        return brand[brandKey];
+      }
+    }
+    return match;
+  });
 }
 
 export function updateFontStyle(child, brand) {

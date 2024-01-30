@@ -1,22 +1,35 @@
-import { updateImageAttributes } from "./svg.utils"
-import { buildFontVariants, getDynamicFontSize, replacePlaceholders, updateFontStyle } from "./text.utils"
+import { updateImageAttributes } from './svg.utils'
+import {
+  buildFontVariants,
+  getDynamicFontSize,
+  replacePlaceholders,
+  updateFontStyle,
+} from './text.utils'
 
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { createInstance } from 'polotno-node';
+import { createInstance } from 'polotno-node'
+import {
+  findColorByPrimary,
+  getColor,
+  getDarkerColor,
+  getLighterColor,
+} from './colors.utils'
 
 require('dotenv').config()
 
 export async function updateDesignWithBrand(design, brand, withPreview) {
   for (const page of design.pages) {
-    await Promise.all(page.children.map((child) => processChild(child, brand, withPreview)))
+    await Promise.all(
+      page.children.map((child) => processChild(child, brand, withPreview)),
+    )
   }
-  
+
   if (withPreview) {
     const instance = await createInstance({
       key: process.env.POLOTNO_KEY,
-    });
+    })
     const data = await instance.jsonToImageBase64(design, {})
     design.preview = data
   }
@@ -47,9 +60,70 @@ export async function processChild(child, brand) {
     await updateImageAttributes(child, brand)
   }
 
+  if (child.type === 'figure') {
+    await updateColorAttributes(child, brand)
+  }
+
   if (child.children) {
     child.children.forEach((nestedChild) => {
       processChild(nestedChild, brand, withPreview)
     })
+  }
+}
+
+export function splitColorClass(colorClass) {
+  const parts = colorClass.split('_on_');
+  return parts.length === 2 ? parts : [colorClass, null];
+}
+
+export async function updateColorAttributes(child, brand) {
+  const classes = [
+    'primary',
+    'secondary',
+    'black',
+    'white',
+    'light_color',
+    'dark_color',
+    'primary_on_secondary',
+    'secondary_on_primary',
+    'primary_on_black',
+    'primary_on_white',
+    'secondary_on_black',
+    'secondary_on_white',
+  ]
+
+  let fillColor, strokeColor
+
+  classes.forEach((colorClass) => {
+    if (child.name.includes(`fill_${colorClass}`)) {
+      const [top, bottom] = splitColorClass(colorClass);
+      fillColor = getColor(brand, top, bottom)
+    }
+    if (child.name.includes(`stroke_${colorClass}`)) {
+      const [top, bottom] = splitColorClass(colorClass);
+      strokeColor = getColor(brand, top, bottom)
+    }
+    if (child.name.includes(colorClass) && !fillColor && !strokeColor) {
+      const [top, bottom] = splitColorClass(colorClass);
+      fillColor = strokeColor = getColor(brand, top, bottom)
+    }
+  })
+
+  // Dual Attribute Colors
+  const dualPattern = /fill_([a-zA-Z]+)_stroke_([a-zA-Z]+)/
+  const dualMatch = child.name.match(dualPattern)
+  if (dualMatch) {
+    const [top1, bottom1] = splitColorClass(dualMatch[1]);
+    fillColor = getColor(brand, top1, bottom1)
+    const [top2, bottom2] = splitColorClass(dualMatch[2]);
+    strokeColor = getColor(brand, top2, bottom2)
+  }
+
+  // Apply the colors
+  if (fillColor) {
+    child.fill = fillColor
+  }
+  if (strokeColor) {
+    child.stroke = strokeColor
   }
 }

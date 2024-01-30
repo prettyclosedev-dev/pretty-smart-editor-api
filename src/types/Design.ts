@@ -9,7 +9,7 @@ export const Design = objectType({
     t.model.preview()
     t.model.width()
     t.model.height()
-    t.model.pages({ ordering: true, filtering: true, pagination: true })
+    t.model.pages()
     t.model.fonts()
     t.model.unit()
     t.model.dpi()

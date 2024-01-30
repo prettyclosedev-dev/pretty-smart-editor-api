@@ -81,7 +81,7 @@ model Page {
   background String
   duration   Int?
   bleed      Int
-  design     Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
+  // design     Design  @relation(fields: [designId], references: [id], onDelete: Cascade)
   designId   Int
 }
 
@@ -102,7 +102,7 @@ model Design {
   polotnoId          String?    @unique
   name               String
   preview            String
-  pages              Page[]
+  pages              Json[]
   width              Int
   height             Int
   fonts              String[]

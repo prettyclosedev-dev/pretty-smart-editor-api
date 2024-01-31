@@ -10,7 +10,6 @@ export const Page = objectType({
     t.model.height()
     t.model.background()
     t.model.bleed()
-    t.model.design()
     t.model.duration()
   },
 })

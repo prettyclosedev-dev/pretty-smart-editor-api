@@ -1,6 +1,6 @@
 export * from './Design'
 export * from './Mutation'
-export * from './Page'
+// export * from './Page'
 export * from './Query'
 export * from './User'
 export * from './Client'

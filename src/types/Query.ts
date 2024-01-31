@@ -48,19 +48,19 @@ export const Query = queryType({
       },
     })
 
-    t.crud.page()
-    t.crud.pages({ filtering: true, ordering: true, pagination: true })
-    t.nullable.field('pagesCount', {
-      type: 'Int',
-      args: {
-        where: 'PageWhereInput',
-      },
-      resolve: (parent, args, ctx) => {
-        return ctx.prisma.page.count({
-          where: args.where,
-        })
-      },
-    })
+    // t.crud.page()
+    // t.crud.pages({ filtering: true, ordering: true, pagination: true })
+    // t.nullable.field('pagesCount', {
+    //   type: 'Int',
+    //   args: {
+    //     where: 'PageWhereInput',
+    //   },
+    //   resolve: (parent, args, ctx) => {
+    //     return ctx.prisma.page.count({
+    //       where: args.where,
+    //     })
+    //   },
+    // })
 
     t.crud.design()
     t.nullable.field('brandedDesign', {

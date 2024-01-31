@@ -213,7 +213,7 @@ export async function updateImageAttributes(child, brand) {
 
   const elementType = elementColorSchemeMatch[1]
   const colorScheme = elementColorSchemeMatch[2]
-console.log(colorScheme)
+
   var mutateColors = false
 
   var fetchedAsset

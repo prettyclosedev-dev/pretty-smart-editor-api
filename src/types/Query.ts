@@ -95,7 +95,18 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
-          const brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          let brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          if (user.role === 'ADMIN' && args.brandWhere?.id) {
+            brand = await ctx.prisma.brand.findUnique({
+              where: {
+                id: args.brandWhere.id,
+              },
+              include: {
+                colors: true,
+                fonts: true,
+              },
+            })
+          }
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
@@ -147,7 +158,18 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
-          const brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          let brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          if (user.role === 'ADMIN' && args.brandWhere?.id) {
+            brand = await ctx.prisma.brand.findUnique({
+              where: {
+                id: args.brandWhere.id,
+              },
+              include: {
+                colors: true,
+                fonts: true,
+              },
+            })
+          }
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }

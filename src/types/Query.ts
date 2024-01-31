@@ -75,9 +75,9 @@ export const Query = queryType({
         try {
           const design = await ctx.prisma.design.findUnique({
             where: args.where,
-            include: {
-              pages: true,
-            },
+            // include: {
+            //   pages: true,
+            // },
           })
           const user = await ctx.prisma.user.findUnique({
             where: {
@@ -138,9 +138,9 @@ export const Query = queryType({
             orderBy: args.orderBy,
             skip: args.skip,
             cursor: args.cursor,
-            include: {
-              pages: true,
-            },
+            // include: {
+            //   pages: true,
+            // },
           })
           const user = await ctx.prisma.user.findUnique({
             where: {
@@ -279,7 +279,7 @@ export const Query = queryType({
         try {
           const designJson = await ctx.prisma.design.findUnique({
             where: { id: designId },
-            include: { pages: true },
+            // include: { pages: true },
           })
           if (!designJson) {
             throw new Error('No design found for the id provided.')
@@ -314,7 +314,7 @@ export const Query = queryType({
           if (!designJson && !!designId) {
             const design = await ctx.prisma.design.findUnique({
               where: { id: designId },
-              include: { pages: true },
+              // include: { pages: true },
             })
             if (design) {
               designJson = design

@@ -49,14 +49,14 @@ export async function fetchImage(srcUrl) {
 }
 
 export function replaceSvgSetting(svg, key, val) {
-  const regexKeyExists = new RegExp(`${key}=".*?"`, 'g');
+  const regexKeyExists = new RegExp(`${key}=".*?"`, 'g')
   if (svg.search(regexKeyExists) !== -1) {
     // Replace existing key
-    return svg.replace(regexKeyExists, `${key}="${val}"`);
+    return svg.replace(regexKeyExists, `${key}="${val}"`)
   } else {
     // Add key to all tags
-    const regexAddKey = /<(\w+)([^>]*)>/g;
-    return svg.replace(regexAddKey, `<$1 ${key}="${val}"$2>`);
+    const regexAddKey = /<(\w+)([^>]*)>/g
+    return svg.replace(regexAddKey, `<$1 ${key}="${val}"$2>`)
   }
 }
 
@@ -137,7 +137,7 @@ function replaceOrAddAttribute(svg, attrName, attrValue) {
 
 async function getOptimizedSVG(svg, brand) {
   svg = await svgo.optimize(svg, svgOutputSettings).data
-
+  return svg;
   // let classStyleFill = new RegExp('cls-.*?;}', 'g')
   // let classStyleMatches = svg.match(classStyleFill) //[ 'cls-1{fill:#fe5e15;}', 'cls-2{fill:#131545;}' ]
   // if (classStyleMatches && classStyleMatches.length) {
@@ -207,139 +207,139 @@ async function getOptimizedSVG(svg, brand) {
 }
 
 export async function updateImageAttributes(child, brand) {
-  // add handle for image type and add avatar
-  const elementColorSchemeMatch = child.name.match(/^\{(\w+?)(?:_(.+))?}$/)
-  if (!elementColorSchemeMatch) return
+  try {
+    // add handle for image type and add avatar
+    const elementColorSchemeMatch = child.name.match(/^\{(\w+?)(?:_(.+))?}$/)
+    if (!elementColorSchemeMatch) return
 
-  const elementType = elementColorSchemeMatch[1]
-  const colorScheme = elementColorSchemeMatch[2]
+    const elementType = elementColorSchemeMatch[1]
+    const colorScheme = elementColorSchemeMatch[2]
 
-  var mutateColors = false
+    const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, ''); // Removes the data:image/svg+xml;base64, part of the string
+    var fetchedAsset = atob(cleanedString); // Decodes the string back to SVG markup
+    
+    var elementTypeIncluded = ['logo', 'icon', 'wordmark'].includes(elementType)
 
-  var fetchedAsset
+    var mutateColors = elementTypeIncluded || !colorScheme // if not color scheme means only a color is provided
 
-  // Update the src attribute based on the name of the element
-  if (
-    ['logo', 'icon', 'wordmark'].includes(elementType) &&
-    brand[elementType]
-  ) {
-    if (/^https?:\/\//.test(brand[elementType])) {
-      fetchedAsset = await fetchImage(brand[elementType])
-    } else {
-      child.src = brand[elementType]
+    // Update the src attribute based on the name of the element
+    if (elementTypeIncluded && brand[elementType]) {
+      if (/^https?:\/\//.test(brand[elementType])) {
+        fetchedAsset = await fetchImage(brand[elementType])
+      } else {
+        child.src = brand[elementType]
+      }
     }
-    mutateColors = true
-  }
 
-  let finalSvg = fetchedAsset;
+    let finalSvg = fetchedAsset
 
-  // Handle SVG color replacement
-  if (
-    mutateColors &&
-    child.type === 'svg' &&
-    child.colorsReplace &&
-    Array.isArray(brand.colors) &&
-    fetchedAsset?.length
-  ) {
-    // Determine colors based on colorScheme
-    let colorsToApply = []
-    let fillColorToApply = '#ffffff'
+    // Handle SVG color replacement
+    if (
+      mutateColors &&
+      child.type === 'svg' &&
+      child.colorsReplace &&
+      Array.isArray(brand.colors) &&
+      fetchedAsset?.length
+    ) {
+      // Determine colors based on colorScheme
+      let colorsToApply = []
+      let fillColorToApply = '#ffffff'
 
-    if (colorScheme) {
-      switch (colorScheme) {
-        case 'primary_on_secondary':
-          colorsToApply = [
-            findColorByPrimary(brand, true),
-            findColorByPrimary(brand, false),
-          ]
-          fillColorToApply = getColor(brand, 'primary', 'secondary')
-          break
-        case 'secondary_on_primary':
-          colorsToApply = [
-            findColorByPrimary(brand, false),
-            findColorByPrimary(brand, true),
-          ]
-          fillColorToApply = getColor(brand, 'secondary', 'primary')
-          break
-        case 'primary_on_black':
-          colorsToApply = [findColorByPrimary(brand, true), '#000000']
-          fillColorToApply = getColor(brand, 'primary', 'black')
-          break
-        case 'primary_on_white':
-          colorsToApply = [findColorByPrimary(brand, true), '#ffffff']
-          fillColorToApply = getColor(brand, 'primary', 'white')
-          break
-        case 'secondary_on_black':
-          colorsToApply = [findColorByPrimary(brand, false), '#000000']
-          fillColorToApply = getColor(brand, 'secondary', 'black')
-          break
-        case 'secondary_on_white':
-          colorsToApply = [findColorByPrimary(brand, false), '#ffffff']
-          fillColorToApply = getColor(brand, 'secondary', 'white')
-          break
-        case 'white':
-          colorsToApply = ['#ffffff']
-          break
-        case 'black':
-          colorsToApply = ['#000000']
-          fillColorToApply = '#000000'
-          break
-        case 'light_color':
-          fillColorToApply = getLighterColor(brand, 'primary', 'secondary')
-          break
-        case 'dark_color':
-          fillColorToApply = getDarkerColor(brand, 'primary', 'secondary')
-          break
-        case 'primary':
-          fillColorToApply = findColorByPrimary(brand, true)
-          break
-        case 'secondary':
-          fillColorToApply = findColorByPrimary(brand, false)
-          break
-        default:
-          break
+      var colorCase = colorScheme || elementType
+
+      if (colorCase) {
+        switch (colorCase) {
+          case 'primary_on_secondary':
+            colorsToApply = [
+              findColorByPrimary(brand, true),
+              findColorByPrimary(brand, false),
+            ]
+            fillColorToApply = getColor(brand, 'primary', 'secondary')
+            break
+          case 'secondary_on_primary':
+            colorsToApply = [
+              findColorByPrimary(brand, false),
+              findColorByPrimary(brand, true),
+            ]
+            fillColorToApply = getColor(brand, 'secondary', 'primary')
+            break
+          case 'primary_on_black':
+            colorsToApply = [findColorByPrimary(brand, true), '#000000']
+            fillColorToApply = getColor(brand, 'primary', 'black')
+            break
+          case 'primary_on_white':
+            colorsToApply = [findColorByPrimary(brand, true), '#ffffff']
+            fillColorToApply = getColor(brand, 'primary', 'white')
+            break
+          case 'secondary_on_black':
+            colorsToApply = [findColorByPrimary(brand, false), '#000000']
+            fillColorToApply = getColor(brand, 'secondary', 'black')
+            break
+          case 'secondary_on_white':
+            colorsToApply = [findColorByPrimary(brand, false), '#ffffff']
+            fillColorToApply = getColor(brand, 'secondary', 'white')
+            break
+          case 'white':
+            colorsToApply = ['#ffffff']
+            break
+          case 'black':
+            colorsToApply = ['#000000']
+            fillColorToApply = '#000000'
+            break
+          case 'light_color':
+            fillColorToApply = getLighterColor(brand, 'primary', 'secondary')
+            break
+          case 'dark_color':
+            fillColorToApply = getDarkerColor(brand, 'primary', 'secondary')
+            break
+          case 'primary':
+            fillColorToApply = findColorByPrimary(brand, true)
+            break
+          case 'secondary':
+            fillColorToApply = findColorByPrimary(brand, false)
+            break
+          default:
+            break
+        }
+
+        finalSvg = replaceSvgSetting(finalSvg, 'fill', fillColorToApply)
+        finalSvg = replaceSvgSetting(finalSvg, 'stroke', fillColorToApply)
       }
 
-      finalSvg = replaceSvgSetting(finalSvg, 'fill', fillColorToApply)
-      finalSvg = replaceSvgSetting(
-        finalSvg,
-        'stroke',
-        fillColorToApply,
-      )  
+      finalSvg = await getOptimizedSVG(finalSvg, brand)
+
+      // replace width height
+      finalSvg = updateSvgDimensions(finalSvg, child.width, child.height)
+      const base64EncodedSvg = btoa(finalSvg)
+
+      child.src = `data:image/svg+xml;base64,${base64EncodedSvg}`
+
+      child.colorsReplace = {}
+
+      // console.log(colorsToApply, child.colorsReplace)
+
+      // if (!colorsToApply.length) {
+      //   // Sort brand colors by rank, ensuring primary color is first
+      //   const sortedColors = brand.colors.slice().sort((a, b) => {
+      //     if (a.primary) return -1
+      //     if (b.primary) return 1
+      //     return (a.rank || 0) - (b.rank || 0)
+      //   })
+
+      //   // Apply sorted colors to the SVG
+      //   colorsToApply = sortedColors.map((color) => color.value)
+      // }
+
+      // // Apply colors to the SVG
+      // Object.keys(child.colorsReplace).forEach((colorKey, index) => {
+      //   if (colorsToApply[index]) {
+      //     child.colorsReplace[colorKey] = colorsToApply[index]
+      //   }
+      // })
+
+      // console.log(child.colorsReplace)
     }
-
-    finalSvg = await getOptimizedSVG(finalSvg, brand)
-
-   
-    // replace width height
-    finalSvg = updateSvgDimensions(finalSvg, child.width, child.height)
-    const base64EncodedSvg = btoa(finalSvg)
-
-    child.src = `data:image/svg+xml;base64,${base64EncodedSvg}`
-
-    child.colorsReplace = {}
-
-    // console.log(colorsToApply, child.colorsReplace)
-
-    // if (!colorsToApply.length) {
-    //   // Sort brand colors by rank, ensuring primary color is first
-    //   const sortedColors = brand.colors.slice().sort((a, b) => {
-    //     if (a.primary) return -1
-    //     if (b.primary) return 1
-    //     return (a.rank || 0) - (b.rank || 0)
-    //   })
-
-    //   // Apply sorted colors to the SVG
-    //   colorsToApply = sortedColors.map((color) => color.value)
-    // }
-
-    // // Apply colors to the SVG
-    // Object.keys(child.colorsReplace).forEach((colorKey, index) => {
-    //   if (colorsToApply[index]) {
-    //     child.colorsReplace[colorKey] = colorsToApply[index]
-    //   }
-    // })
-
-    // console.log(child.colorsReplace)
+  } catch (error) {
+    console.log(error)
   }
 }

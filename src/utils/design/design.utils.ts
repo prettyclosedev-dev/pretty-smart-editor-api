@@ -4,6 +4,7 @@ import {
   getDynamicFontSize,
   replacePlaceholders,
   updateFontStyle,
+  updateTextColorAttributes,
 } from './text.utils'
 
 import * as fs from 'fs'
@@ -54,6 +55,8 @@ export async function processChild(child, brand) {
     })
 
     child.fontSize = newFontSize
+
+    updateColorAttributes(child, brand)
   }
 
   if (child.type === 'svg' || child.type === 'image') {

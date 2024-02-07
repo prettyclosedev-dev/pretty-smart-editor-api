@@ -1,13 +1,18 @@
 const { createCanvas, registerFont } = require('canvas')
 
-export function replacePlaceholders(text, brand) { // add mortgage and other text placeholders
-  return text.replace(/\{(\w+)\}/g, (match, key) => {
-    for (let brandKey in brand) {
+export function replacePlaceholders(child, brand) {
+  const brandKeys = Object.keys(brand);
+  const deepNameCopy = child.name;
+  // Create a regex pattern to identify placeholders within {}
+  const placeholderPattern = /{([^}]+)}/g;
+  // Extract keys from child.name and replace in child.text
+  deepNameCopy.match(placeholderPattern)?.forEach((match) => {
+    const key = match.slice(1, -1); // Remove the curly braces to get the key
+    for (const brandKey of brandKeys) {
       if (key.includes(brandKey)) {
-        return brand[brandKey];
+        child.text = deepNameCopy.replace(new RegExp(`{${key}}`, 'g'), brand[brandKey]);
       }
     }
-    return match;
   });
 }
 
@@ -76,8 +81,8 @@ export async function getDynamicFontSize({
         fontSize,
       )}px ${fontName}`
 
-      const getLines = (ctx, text, maxWidth, maxHeight) => {
-        var words = text.split(' ')
+      const getLines = (ctx, text = '', maxWidth, maxHeight) => {
+        var words = text?.split(' ')
         var lines = []
         var currentLine = words[0]
 

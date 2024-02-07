@@ -20,10 +20,10 @@ import {
 
 require('dotenv').config()
 
-export async function updateDesignWithBrand(design, brand, withPreview) {
+export async function updateDesignWithBrand({design, brand, withPreview, user}) {
   for (const page of design.pages) {
     await Promise.all(
-      page.children.map((child) => processChild(child, brand, withPreview)),
+      page.children.map((child) => processChild({child, brand, withPreview, user})),
     )
   }
 
@@ -38,9 +38,9 @@ export async function updateDesignWithBrand(design, brand, withPreview) {
   return design
 }
 
-export async function processChild(child, brand) {
+export async function processChild({child, brand, withPreview, user}) {
   if (child.type === 'text') {
-    child.text = replacePlaceholders(child.name, brand)
+    replacePlaceholders(child, brand)
     updateFontStyle(child, brand)
 
     // missing here is capital letters, custom fonts and register fonts
@@ -60,16 +60,16 @@ export async function processChild(child, brand) {
   }
 
   if (child.type === 'svg' || child.type === 'image') {
-    await updateImageAttributes(child, brand)
+    await updateImageAttributes(child, brand, user)
   }
 
-  if (child.type === 'figure') {
+  if (child.type === 'figure' || child.type === 'line') {
     await updateColorAttributes(child, brand)
   }
 
   if (child.children) {
     child.children.forEach((nestedChild) => {
-      processChild(nestedChild, brand, withPreview)
+      processChild({child: nestedChild, brand, withPreview, user})
     })
   }
 }
@@ -95,7 +95,7 @@ export async function updateColorAttributes(child, brand) {
     'secondary_on_white',
   ]
 
-  let fillColor, strokeColor
+  let fillColor, strokeColor, color;
 
   classes.forEach((colorClass) => {
     if (child.name.includes(`fill_${colorClass}`)) {
@@ -108,7 +108,7 @@ export async function updateColorAttributes(child, brand) {
     }
     if (child.name.includes(colorClass) && !fillColor && !strokeColor) {
       const [top, bottom] = splitColorClass(colorClass);
-      fillColor = strokeColor = getColor(brand, top, bottom)
+      fillColor = strokeColor = color = getColor(brand, top, bottom)
     }
   })
 
@@ -123,10 +123,13 @@ export async function updateColorAttributes(child, brand) {
   }
 
   // Apply the colors
-  if (fillColor) {
+  if (fillColor && child.hasOwnProperty('fill')) {
     child.fill = fillColor
   }
-  if (strokeColor) {
+  if (strokeColor && child.hasOwnProperty('stroke')) {
     child.stroke = strokeColor
+  }
+  if (color && child.hasOwnProperty('color')) {
+    child.color = color
   }
 }

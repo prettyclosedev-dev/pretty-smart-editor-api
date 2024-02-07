@@ -137,7 +137,7 @@ function replaceOrAddAttribute(svg, attrName, attrValue) {
 
 async function getOptimizedSVG(svg, brand) {
   svg = await svgo.optimize(svg, svgOutputSettings).data
-  return svg;
+  return svg
   // let classStyleFill = new RegExp('cls-.*?;}', 'g')
   // let classStyleMatches = svg.match(classStyleFill) //[ 'cls-1{fill:#fe5e15;}', 'cls-2{fill:#131545;}' ]
   // if (classStyleMatches && classStyleMatches.length) {
@@ -206,7 +206,7 @@ async function getOptimizedSVG(svg, brand) {
   return svg
 }
 
-export async function updateImageAttributes(child, brand) {
+export async function updateImageAttributes(child, brand, user) {
   try {
     // add handle for image type and add avatar
     const elementColorSchemeMatch = child.name.match(/^\{(\w+?)(?:_(.+))?}$/)
@@ -215,9 +215,14 @@ export async function updateImageAttributes(child, brand) {
     const elementType = elementColorSchemeMatch[1]
     const colorScheme = elementColorSchemeMatch[2]
 
-    const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, ''); // Removes the data:image/svg+xml;base64, part of the string
-    var fetchedAsset = atob(cleanedString); // Decodes the string back to SVG markup
-    
+    if (elementType === 'avatar' && user?.avatar?.length) { // && child.type === 'image'
+        child.src = user.avatar
+        return
+    }
+
+    const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, '') // Removes the data:image/svg+xml;base64, part of the string
+    var fetchedAsset = atob(cleanedString) // Decodes the string back to SVG markup
+
     var elementTypeIncluded = ['logo', 'icon', 'wordmark'].includes(elementType)
 
     var mutateColors = elementTypeIncluded || !colorScheme // if not color scheme means only a color is provided
@@ -243,7 +248,7 @@ export async function updateImageAttributes(child, brand) {
     ) {
       // Determine colors based on colorScheme
       let colorsToApply = []
-      let fillColorToApply = '#ffffff'
+      let fillColorToApply
 
       var colorCase = colorScheme || elementType
 
@@ -302,8 +307,10 @@ export async function updateImageAttributes(child, brand) {
             break
         }
 
-        finalSvg = replaceSvgSetting(finalSvg, 'fill', fillColorToApply)
-        finalSvg = replaceSvgSetting(finalSvg, 'stroke', fillColorToApply)
+        if (fillColorToApply?.length) {
+          finalSvg = replaceSvgSetting(finalSvg, 'fill', fillColorToApply)
+          finalSvg = replaceSvgSetting(finalSvg, 'stroke', fillColorToApply)
+        }
       }
 
       finalSvg = await getOptimizedSVG(finalSvg, brand)

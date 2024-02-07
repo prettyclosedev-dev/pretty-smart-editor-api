@@ -110,7 +110,7 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
-          const updatedDesign = await updateDesignWithBrand(design, brand, args.withPreview);
+          const updatedDesign = await updateDesignWithBrand({design, brand, withPreview: args.withPreview, user});
           return updatedDesign;
         } catch (e) {
           throw e
@@ -174,7 +174,7 @@ export const Query = queryType({
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
-            designs.map(async design => await updateDesignWithBrand(design, brand, args.withPreview))
+            designs.map(async design => await updateDesignWithBrand({design, brand, withPreview: args.withPreview, user}))
           );
           return updatedDesigns;
         } catch (e) {

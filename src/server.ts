@@ -77,6 +77,11 @@ async function startApolloServer() {
   await server.start()
 
   const app = express()
+
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+  app.use(express.json({ limit: '50mb' }));
+  app.use(cors())
+
   server.applyMiddleware({ app })
 
   // Create the HTTPS or HTTP server, per configuration
@@ -115,11 +120,6 @@ async function startApolloServer() {
   )
 
   server.applyMiddleware({ app })
-
-  // Add these lines
-  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-  app.use(express.json({ limit: '50mb' }));
-  app.use(cors())
 
   // Set up basic authentication
   app.use(

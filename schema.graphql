@@ -158,20 +158,20 @@ input BrandOrderByRelationAggregateInput {
 
 input BrandOrderByWithRelationInput {
   colors: ColorOrderByRelationAggregateInput
-  email: SortOrder
+  email: SortOrderInput
   fonts: FontOrderByRelationAggregateInput
   icon: SortOrder
   id: SortOrder
-  industry: SortOrder
+  industry: SortOrderInput
   logo: SortOrder
   name: SortOrder
-  phone: SortOrder
-  prettySmartId: SortOrder
+  phone: SortOrderInput
+  prettySmartId: SortOrderInput
   specialCategories: CategoryOrderByRelationAggregateInput
   specialDesigns: DesignOrderByRelationAggregateInput
-  tagline: SortOrder
+  tagline: SortOrderInput
   user: UserOrderByWithRelationInput
-  userId: SortOrder
+  userId: SortOrderInput
   wordmark: SortOrder
 }
 
@@ -380,9 +380,25 @@ input BrandWhereInput {
 }
 
 input BrandWhereUniqueInput {
+  AND: [BrandWhereInput!]
+  colors: ColorListRelationFilter
   email: String
+  fonts: FontListRelationFilter
+  icon: StringFilter
   id: Int
+  industry: StringNullableFilter
+  logo: StringFilter
+  name: StringFilter
+  NOT: [BrandWhereInput!]
+  OR: [BrandWhereInput!]
+  phone: StringNullableFilter
   prettySmartId: String
+  specialCategories: CategoryListRelationFilter
+  specialDesigns: DesignListRelationFilter
+  tagline: StringNullableFilter
+  user: UserWhereInput
+  userId: IntNullableFilter
+  wordmark: StringFilter
 }
 
 type Category {
@@ -516,11 +532,11 @@ input CategoryOrderByRelationAggregateInput {
 input CategoryOrderByWithRelationInput {
   availableForBrands: BrandOrderByRelationAggregateInput
   creator: UserOrderByWithRelationInput
-  creatorId: SortOrder
+  creatorId: SortOrderInput
   designs: DesignOrderByRelationAggregateInput
   id: SortOrder
   name: SortOrder
-  public: SortOrder
+  public: SortOrderInput
   tags: SortOrder
   templates: TemplateOrderByRelationAggregateInput
 }
@@ -726,7 +742,18 @@ input CategoryWhereInput {
 }
 
 input CategoryWhereUniqueInput {
+  AND: [CategoryWhereInput!]
+  availableForBrands: BrandListRelationFilter
+  creator: UserWhereInput
+  creatorId: IntNullableFilter
+  designs: DesignListRelationFilter
   id: Int
+  name: StringFilter
+  NOT: [CategoryWhereInput!]
+  OR: [CategoryWhereInput!]
+  public: BoolNullableFilter
+  tags: StringNullableListFilter
+  templates: TemplateListRelationFilter
 }
 
 type Client {
@@ -772,8 +799,12 @@ input ClientWhereInput {
 }
 
 input ClientWhereUniqueInput {
+  AND: [ClientWhereInput!]
   id: Int
   ip: String
+  name: StringFilter
+  NOT: [ClientWhereInput!]
+  OR: [ClientWhereInput!]
   token: String
 }
 
@@ -827,10 +858,10 @@ input ColorOrderByRelationAggregateInput {
 
 input ColorOrderByWithRelationInput {
   brand: BrandOrderByWithRelationInput
-  brandId: SortOrder
+  brandId: SortOrderInput
   id: SortOrder
-  primary: SortOrder
-  rank: SortOrder
+  primary: SortOrderInput
+  rank: SortOrderInput
   value: SortOrder
 }
 
@@ -900,7 +931,15 @@ input ColorWhereInput {
 }
 
 input ColorWhereUniqueInput {
+  AND: [ColorWhereInput!]
+  brand: BrandWhereInput
+  brandId: IntNullableFilter
   id: Int
+  NOT: [ColorWhereInput!]
+  OR: [ColorWhereInput!]
+  primary: BoolNullableFilter
+  rank: IntNullableFilter
+  value: StringFilter
 }
 
 scalar DateTime
@@ -1095,7 +1134,7 @@ input DesignOrderByWithRelationInput {
   availableForBrands: BrandOrderByRelationAggregateInput
   categories: CategoryOrderByRelationAggregateInput
   creator: UserOrderByWithRelationInput
-  creatorId: SortOrder
+  creatorId: SortOrderInput
   dpi: SortOrder
   editedDate: SortOrder
   fonts: SortOrder
@@ -1103,9 +1142,9 @@ input DesignOrderByWithRelationInput {
   id: SortOrder
   name: SortOrder
   pages: SortOrder
-  polotnoId: SortOrder
+  polotnoId: SortOrderInput
   preview: SortOrder
-  public: SortOrder
+  public: SortOrderInput
   publishedDate: SortOrder
   tags: SortOrder
   unit: SortOrder
@@ -1350,8 +1389,27 @@ input DesignWhereInput {
 }
 
 input DesignWhereUniqueInput {
+  AND: [DesignWhereInput!]
+  availableForBrands: BrandListRelationFilter
+  categories: CategoryListRelationFilter
+  creator: UserWhereInput
+  creatorId: IntNullableFilter
+  dpi: IntFilter
+  editedDate: DateTimeFilter
+  fonts: StringNullableListFilter
+  height: IntFilter
   id: Int
+  name: StringFilter
+  NOT: [DesignWhereInput!]
+  OR: [DesignWhereInput!]
+  pages: JsonNullableListFilter
   polotnoId: String
+  preview: StringFilter
+  public: BoolNullableFilter
+  publishedDate: DateTimeFilter
+  tags: StringNullableListFilter
+  unit: StringFilter
+  width: IntFilter
 }
 
 input EnumUserRoleFieldUpdateOperationsInput {
@@ -1423,15 +1481,15 @@ input FontOrderByRelationAggregateInput {
 }
 
 input FontOrderByWithRelationInput {
-  bold: SortOrder
+  bold: SortOrderInput
   brand: BrandOrderByWithRelationInput
-  brandId: SortOrder
-  google: SortOrder
+  brandId: SortOrderInput
+  google: SortOrderInput
   id: SortOrder
-  italic: SortOrder
-  name: SortOrder
-  url: SortOrder
-  value: SortOrder
+  italic: SortOrderInput
+  name: SortOrderInput
+  url: SortOrderInput
+  value: SortOrderInput
 }
 
 input FontScalarWhereInput {
@@ -1512,7 +1570,18 @@ input FontWhereInput {
 }
 
 input FontWhereUniqueInput {
+  AND: [FontWhereInput!]
+  bold: BoolNullableFilter
+  brand: BrandWhereInput
+  brandId: IntNullableFilter
+  google: BoolNullableFilter
   id: Int
+  italic: BoolNullableFilter
+  name: StringNullableFilter
+  NOT: [FontWhereInput!]
+  OR: [FontWhereInput!]
+  url: StringNullableFilter
+  value: StringNullableFilter
 }
 
 input IntFieldUpdateOperationsInput {
@@ -1560,49 +1629,42 @@ type Mutation {
   createManyCategory(data: [CategoryCreateInput]!): Boolean
   createManyClient(data: [ClientCreateInput]!): Boolean
   createManyDesign(data: [DesignCreateInput]!): Boolean
-  createManyPage(data: [PageCreateInput]!): Boolean
   createManyTemplate(data: [TemplateCreateInput]!): Boolean
   createManyUser(data: [UserCreateInput]!): Boolean
   createOneBrand(data: BrandCreateInput!): Brand!
   createOneCategory(data: CategoryCreateInput!): Category!
   createOneClient(data: ClientCreateInput!): Client!
   createOneDesign(data: DesignCreateInput!): Design!
-  createOnePage(data: PageCreateInput!): Page!
   createOneTemplate(data: TemplateCreateInput!): Template!
   createOneUser(data: UserCreateInput!): User!
   deleteManyBrand(where: BrandWhereInput): AffectedRowsOutput!
   deleteManyCategory(where: CategoryWhereInput): AffectedRowsOutput!
   deleteManyClient(where: ClientWhereInput): AffectedRowsOutput!
   deleteManyDesign(where: DesignWhereInput): AffectedRowsOutput!
-  deleteManyPage(where: PageWhereInput): AffectedRowsOutput!
   deleteManyTemplate(where: TemplateWhereInput): AffectedRowsOutput!
   deleteManyUser(where: UserWhereInput): AffectedRowsOutput!
   deleteOneBrand(where: BrandWhereUniqueInput!): Brand
   deleteOneCategory(where: CategoryWhereUniqueInput!): Category
   deleteOneClient(where: ClientWhereUniqueInput!): Client
   deleteOneDesign(where: DesignWhereUniqueInput!): Design
-  deleteOnePage(where: PageWhereUniqueInput!): Page
   deleteOneTemplate(where: TemplateWhereUniqueInput!): Template
   deleteOneUser(where: UserWhereUniqueInput!): User
   updateManyBrand(data: BrandUpdateManyMutationInput!, where: BrandWhereInput): AffectedRowsOutput!
   updateManyCategory(data: CategoryUpdateManyMutationInput!, where: CategoryWhereInput): AffectedRowsOutput!
   updateManyClient(data: ClientUpdateManyMutationInput!, where: ClientWhereInput): AffectedRowsOutput!
   updateManyDesign(data: DesignUpdateManyMutationInput!, where: DesignWhereInput): AffectedRowsOutput!
-  updateManyPage(data: PageUpdateManyMutationInput!, where: PageWhereInput): AffectedRowsOutput!
   updateManyTemplate(data: TemplateUpdateManyMutationInput!, where: TemplateWhereInput): AffectedRowsOutput!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): AffectedRowsOutput!
   updateOneBrand(data: BrandUpdateInput!, where: BrandWhereUniqueInput!): Brand
   updateOneCategory(data: CategoryUpdateInput!, where: CategoryWhereUniqueInput!): Category
   updateOneClient(data: ClientUpdateInput!, where: ClientWhereUniqueInput!): Client
   updateOneDesign(data: DesignUpdateInput!, where: DesignWhereUniqueInput!): Design
-  updateOnePage(data: PageUpdateInput!, where: PageWhereUniqueInput!): Page
   updateOneTemplate(data: TemplateUpdateInput!, where: TemplateWhereUniqueInput!): Template
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   upsertOneBrand(create: BrandCreateInput!, update: BrandUpdateInput!, where: BrandWhereUniqueInput!): Brand!
   upsertOneCategory(create: CategoryCreateInput!, update: CategoryUpdateInput!, where: CategoryWhereUniqueInput!): Category!
   upsertOneClient(create: ClientCreateInput!, update: ClientUpdateInput!, where: ClientWhereUniqueInput!): Client!
   upsertOneDesign(create: DesignCreateInput!, update: DesignUpdateInput!, where: DesignWhereUniqueInput!): Design!
-  upsertOnePage(create: PageCreateInput!, update: PageUpdateInput!, where: PageWhereUniqueInput!): Page!
   upsertOneTemplate(create: TemplateCreateInput!, update: TemplateUpdateInput!, where: TemplateWhereUniqueInput!): Template!
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
 }
@@ -1696,83 +1758,15 @@ input NullableStringFieldUpdateOperationsInput {
   set: String
 }
 
-type Page {
-  background: String!
-  bleed: Int!
-  children: [Json!]!
-  duration: Int
-  height: String!
-  id: Int!
-  polotnoId: String
-  width: String!
-}
-
-input PageCreatechildrenInput {
-  set: [Json!]
-}
-
-input PageCreateInput {
-  background: String!
-  bleed: Int!
-  children: PageCreatechildrenInput
-  designId: Int!
-  duration: Int
-  height: String
-  polotnoId: String
-  width: String
-}
-
-input PageUpdatechildrenInput {
-  push: Json
-  set: [Json!]
-}
-
-input PageUpdateInput {
-  background: StringFieldUpdateOperationsInput
-  bleed: IntFieldUpdateOperationsInput
-  children: PageUpdatechildrenInput
-  designId: IntFieldUpdateOperationsInput
-  duration: NullableIntFieldUpdateOperationsInput
-  height: StringFieldUpdateOperationsInput
-  polotnoId: NullableStringFieldUpdateOperationsInput
-  width: StringFieldUpdateOperationsInput
-}
-
-input PageUpdateManyMutationInput {
-  background: StringFieldUpdateOperationsInput
-  bleed: IntFieldUpdateOperationsInput
-  children: PageUpdatechildrenInput
-  designId: IntFieldUpdateOperationsInput
-  duration: NullableIntFieldUpdateOperationsInput
-  height: StringFieldUpdateOperationsInput
-  polotnoId: NullableStringFieldUpdateOperationsInput
-  width: StringFieldUpdateOperationsInput
-}
-
-input PageWhereInput {
-  AND: [PageWhereInput!]
-  background: StringFilter
-  bleed: IntFilter
-  children: JsonNullableListFilter
-  designId: IntFilter
-  duration: IntNullableFilter
-  height: StringFilter
-  id: IntFilter
-  NOT: [PageWhereInput!]
-  OR: [PageWhereInput!]
-  polotnoId: StringNullableFilter
-  width: StringFilter
-}
-
-input PageWhereUniqueInput {
-  id: Int
-  polotnoId: String
+enum NullsOrder {
+  first
+  last
 }
 
 type Query {
   brand(where: BrandWhereUniqueInput!): Brand
   brandedDesign(brandWhere: BrandWhereUniqueInput, email: String!, where: DesignWhereUniqueInput, withPreview: Boolean): Json
-  brandedDesigns(brandWhere: BrandWhereUniqueInput, cursor: DesignWhereUniqueInput, email: String!, orderBy: DesignOrderByWithRelationInput, skip: Int, take: Int, where: DesignWhereInput, withPreview: Boolean): [Json]
+  brandedDesigns(brandWhere: BrandWhereUniqueInput, cursor: DesignWhereUniqueInput, email: String!, orderBy: [DesignOrderByWithRelationInput], skip: Int, take: Int, where: DesignWhereInput, withPreview: Boolean): [Json]
   brands(cursor: BrandWhereUniqueInput, orderBy: [BrandOrderByWithRelationInput!], skip: Int, take: Int, where: BrandWhereInput): [Brand!]!
   brandsCount(where: BrandWhereInput): Int
   categories(cursor: CategoryWhereUniqueInput, orderBy: [CategoryOrderByWithRelationInput!], skip: Int, take: Int, where: CategoryWhereInput): [Category!]!
@@ -1805,6 +1799,11 @@ enum QueryMode {
 enum SortOrder {
   asc
   desc
+}
+
+input SortOrderInput {
+  nulls: NullsOrder
+  sort: SortOrder!
 }
 
 input StringFieldUpdateOperationsInput {
@@ -1967,7 +1966,7 @@ input TemplateOrderByRelationAggregateInput {
 input TemplateOrderByWithRelationInput {
   categories: CategoryOrderByRelationAggregateInput
   creator: UserOrderByWithRelationInput
-  creatorId: SortOrder
+  creatorId: SortOrderInput
   description: SortOrder
   editedDate: SortOrder
   height: SortOrder
@@ -1975,7 +1974,7 @@ input TemplateOrderByWithRelationInput {
   id: SortOrder
   name: SortOrder
   preview: SortOrder
-  public: SortOrder
+  public: SortOrderInput
   publishedDate: SortOrder
   tags: SortOrder
   width: SortOrder
@@ -2140,10 +2139,27 @@ input TemplateWhereInput {
 }
 
 input TemplateWhereUniqueInput {
+  AND: [TemplateWhereInput!]
+  categories: CategoryListRelationFilter
+  creator: UserWhereInput
+  creatorId: IntNullableFilter
+  description: StringFilter
+  editedDate: DateTimeFilter
+  height: IntFilter
+  html: StringFilter
   id: Int
+  name: StringFilter
+  NOT: [TemplateWhereInput!]
+  OR: [TemplateWhereInput!]
+  preview: StringFilter
+  public: BoolNullableFilter
+  publishedDate: DateTimeFilter
+  tags: StringNullableListFilter
+  width: IntFilter
 }
 
 type User {
+  avatar: String
   brands(cursor: BrandWhereUniqueInput, orderBy: [BrandOrderByWithRelationInput!], skip: Int, take: Int, where: BrandWhereInput): [Brand!]!
   designs(cursor: DesignWhereUniqueInput, orderBy: [DesignOrderByWithRelationInput!], skip: Int, take: Int, where: DesignWhereInput): [Design!]!
   email: String
@@ -2154,6 +2170,7 @@ type User {
 }
 
 input UserCreateInput {
+  avatar: String
   brands: BrandCreateNestedManyWithoutUserInput
   Category: CategoryCreateNestedManyWithoutCreatorInput
   designs: DesignCreateNestedManyWithoutCreatorInput
@@ -2208,6 +2225,7 @@ input UserCreateOrConnectWithoutTemplatesInput {
 }
 
 input UserCreateWithoutBrandsInput {
+  avatar: String
   Category: CategoryCreateNestedManyWithoutCreatorInput
   designs: DesignCreateNestedManyWithoutCreatorInput
   email: String
@@ -2217,6 +2235,7 @@ input UserCreateWithoutBrandsInput {
 }
 
 input UserCreateWithoutCategoryInput {
+  avatar: String
   brands: BrandCreateNestedManyWithoutUserInput
   designs: DesignCreateNestedManyWithoutCreatorInput
   email: String
@@ -2226,6 +2245,7 @@ input UserCreateWithoutCategoryInput {
 }
 
 input UserCreateWithoutDesignsInput {
+  avatar: String
   brands: BrandCreateNestedManyWithoutUserInput
   Category: CategoryCreateNestedManyWithoutCreatorInput
   email: String
@@ -2235,6 +2255,7 @@ input UserCreateWithoutDesignsInput {
 }
 
 input UserCreateWithoutTemplatesInput {
+  avatar: String
   brands: BrandCreateNestedManyWithoutUserInput
   Category: CategoryCreateNestedManyWithoutCreatorInput
   designs: DesignCreateNestedManyWithoutCreatorInput
@@ -2244,10 +2265,11 @@ input UserCreateWithoutTemplatesInput {
 }
 
 input UserOrderByWithRelationInput {
+  avatar: SortOrderInput
   brands: BrandOrderByRelationAggregateInput
   Category: CategoryOrderByRelationAggregateInput
   designs: DesignOrderByRelationAggregateInput
-  email: SortOrder
+  email: SortOrderInput
   id: SortOrder
   name: SortOrder
   role: SortOrder
@@ -2262,6 +2284,7 @@ enum UserRole {
 }
 
 input UserUpdateInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   brands: BrandUpdateManyWithoutUserNestedInput
   Category: CategoryUpdateManyWithoutCreatorNestedInput
   designs: DesignUpdateManyWithoutCreatorNestedInput
@@ -2272,6 +2295,7 @@ input UserUpdateInput {
 }
 
 input UserUpdateManyMutationInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   email: NullableStringFieldUpdateOperationsInput
   name: StringFieldUpdateOperationsInput
   role: EnumUserRoleFieldUpdateOperationsInput
@@ -2281,9 +2305,9 @@ input UserUpdateOneWithoutBrandsNestedInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutBrandsInput
   create: UserCreateWithoutBrandsInput
-  delete: Boolean
-  disconnect: Boolean
-  update: UserUpdateWithoutBrandsInput
+  delete: UserWhereInput
+  disconnect: UserWhereInput
+  update: UserUpdateToOneWithWhereWithoutBrandsInput
   upsert: UserUpsertWithoutBrandsInput
 }
 
@@ -2291,9 +2315,9 @@ input UserUpdateOneWithoutCategoryNestedInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutCategoryInput
   create: UserCreateWithoutCategoryInput
-  delete: Boolean
-  disconnect: Boolean
-  update: UserUpdateWithoutCategoryInput
+  delete: UserWhereInput
+  disconnect: UserWhereInput
+  update: UserUpdateToOneWithWhereWithoutCategoryInput
   upsert: UserUpsertWithoutCategoryInput
 }
 
@@ -2301,9 +2325,9 @@ input UserUpdateOneWithoutDesignsNestedInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutDesignsInput
   create: UserCreateWithoutDesignsInput
-  delete: Boolean
-  disconnect: Boolean
-  update: UserUpdateWithoutDesignsInput
+  delete: UserWhereInput
+  disconnect: UserWhereInput
+  update: UserUpdateToOneWithWhereWithoutDesignsInput
   upsert: UserUpsertWithoutDesignsInput
 }
 
@@ -2311,13 +2335,34 @@ input UserUpdateOneWithoutTemplatesNestedInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutTemplatesInput
   create: UserCreateWithoutTemplatesInput
-  delete: Boolean
-  disconnect: Boolean
-  update: UserUpdateWithoutTemplatesInput
+  delete: UserWhereInput
+  disconnect: UserWhereInput
+  update: UserUpdateToOneWithWhereWithoutTemplatesInput
   upsert: UserUpsertWithoutTemplatesInput
 }
 
+input UserUpdateToOneWithWhereWithoutBrandsInput {
+  data: UserUpdateWithoutBrandsInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutCategoryInput {
+  data: UserUpdateWithoutCategoryInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutDesignsInput {
+  data: UserUpdateWithoutDesignsInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutTemplatesInput {
+  data: UserUpdateWithoutTemplatesInput!
+  where: UserWhereInput
+}
+
 input UserUpdateWithoutBrandsInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   Category: CategoryUpdateManyWithoutCreatorNestedInput
   designs: DesignUpdateManyWithoutCreatorNestedInput
   email: NullableStringFieldUpdateOperationsInput
@@ -2327,6 +2372,7 @@ input UserUpdateWithoutBrandsInput {
 }
 
 input UserUpdateWithoutCategoryInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   brands: BrandUpdateManyWithoutUserNestedInput
   designs: DesignUpdateManyWithoutCreatorNestedInput
   email: NullableStringFieldUpdateOperationsInput
@@ -2336,6 +2382,7 @@ input UserUpdateWithoutCategoryInput {
 }
 
 input UserUpdateWithoutDesignsInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   brands: BrandUpdateManyWithoutUserNestedInput
   Category: CategoryUpdateManyWithoutCreatorNestedInput
   email: NullableStringFieldUpdateOperationsInput
@@ -2345,6 +2392,7 @@ input UserUpdateWithoutDesignsInput {
 }
 
 input UserUpdateWithoutTemplatesInput {
+  avatar: NullableStringFieldUpdateOperationsInput
   brands: BrandUpdateManyWithoutUserNestedInput
   Category: CategoryUpdateManyWithoutCreatorNestedInput
   designs: DesignUpdateManyWithoutCreatorNestedInput
@@ -2356,25 +2404,30 @@ input UserUpdateWithoutTemplatesInput {
 input UserUpsertWithoutBrandsInput {
   create: UserCreateWithoutBrandsInput!
   update: UserUpdateWithoutBrandsInput!
+  where: UserWhereInput
 }
 
 input UserUpsertWithoutCategoryInput {
   create: UserCreateWithoutCategoryInput!
   update: UserUpdateWithoutCategoryInput!
+  where: UserWhereInput
 }
 
 input UserUpsertWithoutDesignsInput {
   create: UserCreateWithoutDesignsInput!
   update: UserUpdateWithoutDesignsInput!
+  where: UserWhereInput
 }
 
 input UserUpsertWithoutTemplatesInput {
   create: UserCreateWithoutTemplatesInput!
   update: UserUpdateWithoutTemplatesInput!
+  where: UserWhereInput
 }
 
 input UserWhereInput {
   AND: [UserWhereInput!]
+  avatar: StringNullableFilter
   brands: BrandListRelationFilter
   Category: CategoryListRelationFilter
   designs: DesignListRelationFilter
@@ -2388,6 +2441,16 @@ input UserWhereInput {
 }
 
 input UserWhereUniqueInput {
+  AND: [UserWhereInput!]
+  avatar: StringNullableFilter
+  brands: BrandListRelationFilter
+  Category: CategoryListRelationFilter
+  designs: DesignListRelationFilter
   email: String
   id: Int
+  name: StringFilter
+  NOT: [UserWhereInput!]
+  OR: [UserWhereInput!]
+  role: EnumUserRoleFilter
+  templates: TemplateListRelationFilter
 }

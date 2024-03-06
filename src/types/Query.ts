@@ -75,9 +75,10 @@ export const Query = queryType({
         try {
           const design = await ctx.prisma.design.findUnique({
             where: args.where,
-            // include: {
-            //   pages: true,
-            // },
+            include: {
+              categories: true,
+              creator: true,
+            },
           })
           const user = await ctx.prisma.user.findUnique({
             where: {
@@ -124,7 +125,7 @@ export const Query = queryType({
         where: 'DesignWhereInput',
         take: nullable('Int'),
         skip: nullable('Int'),
-        orderBy: 'DesignOrderByWithRelationInput',
+        orderBy: list('DesignOrderByWithRelationInput'),
         cursor: 'DesignWhereUniqueInput',
         email: nonNull('String'),
         brandWhere: nullable('BrandWhereUniqueInput'),
@@ -138,9 +139,10 @@ export const Query = queryType({
             orderBy: args.orderBy,
             skip: args.skip,
             cursor: args.cursor,
-            // include: {
-            //   pages: true,
-            // },
+            include: {
+              categories: true,
+              creator: true,
+            },
           })
           const user = await ctx.prisma.user.findUnique({
             where: {

@@ -220,8 +220,14 @@ export async function updateImageAttributes(child, brand, user) {
         return
     }
 
-    const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, '') // Removes the data:image/svg+xml;base64, part of the string
-    var fetchedAsset = atob(cleanedString) // Decodes the string back to SVG markup
+    let fetchedAsset;
+
+    if (child.src.startsWith('data:image/svg+xml;base64,')) {
+      const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, '')
+      fetchedAsset = atob(cleanedString)
+    } else {
+      fetchedAsset = child.src
+    }
 
     var elementTypeIncluded = ['logo', 'icon', 'wordmark'].includes(elementType)
 

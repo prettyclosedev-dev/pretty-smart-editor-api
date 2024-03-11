@@ -20,7 +20,7 @@ import {
 
 require('dotenv').config()
 
-export async function updateDesignWithBrand({design, brand, withPreview, user}) {
+export async function updateDesignWithBrand({design, brand, withPreview, user, previewOptions = {pixelRatio: 0.5}}) { // mimeType: 'image/jpg'
   for (const page of design.pages) {
     await Promise.all(
       page.children.map((child) => processChild({child, brand, withPreview, user})),
@@ -31,7 +31,7 @@ export async function updateDesignWithBrand({design, brand, withPreview, user}) 
     const instance = await createInstance({
       key: process.env.POLOTNO_KEY,
     })
-    const data = await instance.jsonToImageBase64(design, {})
+    const data = await instance.jsonToImageBase64(design, previewOptions)
     design.preview = data
   }
 

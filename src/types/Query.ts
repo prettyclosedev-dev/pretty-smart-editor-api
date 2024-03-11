@@ -70,6 +70,8 @@ export const Query = queryType({
         email: nonNull('String'),
         brandWhere: nullable('BrandWhereUniqueInput'),
         withPreview: nullable('Boolean'),
+        previewOptions: nullable('Json'),
+        returnParams: nullable(list('String')),
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -111,8 +113,21 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
-          const updatedDesign = await updateDesignWithBrand({design, brand, withPreview: args.withPreview, user});
-          return updatedDesign;
+          const updatedDesign = await updateDesignWithBrand({design, brand, withPreview: args.withPreview, previewOptions: args.previewOptions, user});
+          
+          const returnParams = args.returnParams || [];
+          if (returnParams?.length > 0) {
+            const filteredDesign = returnParams.reduce((acc, key) => {
+              if (key in updatedDesign) {
+                acc[key] = updatedDesign[key];
+              }
+              return acc;
+            }, {});
+          
+            return filteredDesign;
+          } else {
+            return updatedDesign;
+          }
         } catch (e) {
           throw e
         }
@@ -130,6 +145,8 @@ export const Query = queryType({
         email: nonNull('String'),
         brandWhere: nullable('BrandWhereUniqueInput'),
         withPreview: nullable('Boolean'),
+        previewOptions: nullable('Json'),
+        returnParams: nullable(list('String'))
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -176,9 +193,24 @@ export const Query = queryType({
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
-            designs.map(async design => await updateDesignWithBrand({design, brand, withPreview: args.withPreview, user}))
+            designs.map(async design => await updateDesignWithBrand({design, brand, withPreview: args.withPreview, previewOptions: args.previewOptions, user}))
           );
-          return updatedDesigns;
+          
+          const returnParams = args.returnParams || [];
+          if (returnParams.length > 0) {
+            const filteredDesigns = updatedDesigns.map(design => {
+              return returnParams.reduce((acc, key) => {
+                if (key in design) {
+                  acc[key] = design[key];
+                }
+                return acc;
+              }, {});
+            });
+          
+            return filteredDesigns;
+          } else {
+            return updatedDesigns; // returnParams is empty, return the full updatedDesigns array
+          }
         } catch (e) {
           throw e
         }

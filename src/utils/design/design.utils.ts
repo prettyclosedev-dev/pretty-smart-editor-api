@@ -43,6 +43,7 @@ export async function updateDesignWithBrand({
       })
       const data = await instance.jsonToImageBase64(design, previewOptions)
       design.preview = data
+      instance.close();
     } catch (e) {
       console.error(e)
     }

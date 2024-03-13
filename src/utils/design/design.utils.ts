@@ -20,25 +20,38 @@ import {
 
 require('dotenv').config()
 
-export async function updateDesignWithBrand({design, brand, withPreview, user, previewOptions = {pixelRatio: 0.5}}) { // mimeType: 'image/jpg'
+export async function updateDesignWithBrand({
+  design,
+  brand,
+  withPreview,
+  user,
+  previewOptions = { pixelRatio: 0.5 },
+}) {
+  // mimeType: 'image/jpg'
   for (const page of design.pages) {
     await Promise.all(
-      page.children.map((child) => processChild({child, brand, withPreview, user})),
+      page.children.map((child) =>
+        processChild({ child, brand, withPreview, user }),
+      ),
     )
   }
 
   if (withPreview) {
-    const instance = await createInstance({
-      key: process.env.POLOTNO_KEY,
-    })
-    const data = await instance.jsonToImageBase64(design, previewOptions)
-    design.preview = data
+    try {
+      const instance = await createInstance({
+        key: process.env.POLOTNO_KEY,
+      })
+      const data = await instance.jsonToImageBase64(design, previewOptions)
+      design.preview = data
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return design
 }
 
-export async function processChild({child, brand, withPreview, user}) {
+export async function processChild({ child, brand, withPreview, user }) {
   if (child.type === 'text') {
     replacePlaceholders(child, brand)
     updateFontStyle(child, brand)
@@ -69,14 +82,14 @@ export async function processChild({child, brand, withPreview, user}) {
 
   if (child.children) {
     child.children.forEach((nestedChild) => {
-      processChild({child: nestedChild, brand, withPreview, user})
+      processChild({ child: nestedChild, brand, withPreview, user })
     })
   }
 }
 
 export function splitColorClass(colorClass) {
-  const parts = colorClass.split('_on_');
-  return parts.length === 2 ? parts : [colorClass, null];
+  const parts = colorClass.split('_on_')
+  return parts.length === 2 ? parts : [colorClass, null]
 }
 
 export async function updateColorAttributes(child, brand) {
@@ -95,19 +108,19 @@ export async function updateColorAttributes(child, brand) {
     'secondary_on_white',
   ]
 
-  let fillColor, strokeColor, color;
+  let fillColor, strokeColor, color
 
   classes.forEach((colorClass) => {
     if (child.name.includes(`fill_${colorClass}`)) {
-      const [top, bottom] = splitColorClass(colorClass);
+      const [top, bottom] = splitColorClass(colorClass)
       fillColor = getColor(brand, top, bottom)
     }
     if (child.name.includes(`stroke_${colorClass}`)) {
-      const [top, bottom] = splitColorClass(colorClass);
+      const [top, bottom] = splitColorClass(colorClass)
       strokeColor = getColor(brand, top, bottom)
     }
     if (child.name.includes(colorClass) && !fillColor && !strokeColor) {
-      const [top, bottom] = splitColorClass(colorClass);
+      const [top, bottom] = splitColorClass(colorClass)
       fillColor = strokeColor = color = getColor(brand, top, bottom)
     }
   })
@@ -116,9 +129,9 @@ export async function updateColorAttributes(child, brand) {
   const dualPattern = /fill_([a-zA-Z]+)_stroke_([a-zA-Z]+)/
   const dualMatch = child.name.match(dualPattern)
   if (dualMatch) {
-    const [top1, bottom1] = splitColorClass(dualMatch[1]);
+    const [top1, bottom1] = splitColorClass(dualMatch[1])
     fillColor = getColor(brand, top1, bottom1)
-    const [top2, bottom2] = splitColorClass(dualMatch[2]);
+    const [top2, bottom2] = splitColorClass(dualMatch[2])
     strokeColor = getColor(brand, top2, bottom2)
   }
 

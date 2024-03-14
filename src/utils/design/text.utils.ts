@@ -2,18 +2,29 @@ const { createCanvas, registerFont } = require('canvas')
 
 export function replacePlaceholders(child, brand) {
   const brandKeys = Object.keys(brand);
-  const deepNameCopy = child.name;
   // Create a regex pattern to identify placeholders within {}
   const placeholderPattern = /{([^}]+)}/g;
-  // Extract keys from child.name and replace in child.text
-  deepNameCopy.match(placeholderPattern)?.forEach((match) => {
-    const key = match.slice(1, -1); // Remove the curly braces to get the key
+
+  let replacementsMade = false;
+
+  const updatedText = child.name.replace(placeholderPattern, (match, key) => {
+    let replaced = match; // Default to not replacing
+    // Check each brand key to see if it's included in the placeholder key
     for (const brandKey of brandKeys) {
-      if (key.includes(brandKey)) {
-        child.text = deepNameCopy.replace(new RegExp(`{${key}}`, 'g'), brand[brandKey]);
+      if (key.includes(brandKey) && brand.hasOwnProperty(brandKey)) {
+        replaced = brand[brandKey];
+        replacementsMade = true;
+        break; // Once a replacement is made, no need to check further
       }
     }
+    return replaced;
   });
+
+  // Only update child.text if replacements were made
+  if (replacementsMade) {
+    child.text = updatedText;
+  }
+  // If no replacements were made, child.text remains unchanged
 }
 
 export function updateFontStyle(child, brand) {

@@ -71,6 +71,7 @@ export const Query = queryType({
         brandWhere: nullable('BrandWhereUniqueInput'),
         withPreview: nullable('Boolean'),
         previewOptions: nullable('Json'),
+        additional: nullable('Json'),
         returnParams: nullable(list('String')),
       },
       resolve: async (parent, args, ctx) => {
@@ -113,7 +114,7 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
-          const updatedDesign = await updateDesignWithBrand({design, brand, withPreview: args.withPreview, previewOptions: args.previewOptions, user});
+          const updatedDesign = await updateDesignWithBrand({design, brand, additional: args.additional, withPreview: args.withPreview, previewOptions: args.previewOptions, user});
           
           const returnParams = args.returnParams || [];
           if (returnParams?.length > 0) {
@@ -146,6 +147,7 @@ export const Query = queryType({
         brandWhere: nullable('BrandWhereUniqueInput'),
         withPreview: nullable('Boolean'),
         previewOptions: nullable('Json'),
+        additional: nullable('Json'),
         returnParams: nullable(list('String'))
       },
       resolve: async (parent, args, ctx) => {
@@ -193,7 +195,7 @@ export const Query = queryType({
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
-            designs.map(async design => await updateDesignWithBrand({design, brand, withPreview: args.withPreview, previewOptions: args.previewOptions, user}))
+            designs.map(async design => await updateDesignWithBrand({design, brand, additional: args.additional, withPreview: args.withPreview, previewOptions: args.previewOptions, user}))
           );
           
           const returnParams = args.returnParams || [];

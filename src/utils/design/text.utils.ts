@@ -1,7 +1,21 @@
 const { createCanvas, registerFont } = require('canvas')
 
-export function replacePlaceholders(child, brand) {
-  const brandKeys = Object.keys(brand);
+// The following can be passed in additional to be replace if passed and found matching child.name
+// amount
+// address
+// house_image
+// detail1
+// detail2
+// detail3
+// detail4
+// date
+// mortgage_rate
+
+export function replacePlaceholders({child, brand, additional = {}}) {
+  // Merge brand and additional objects. Properties in additional will overwrite those in brand if there's a conflict.
+  const combinedKeysObject = {...brand, ...additional};
+  const combinedKeys = Object.keys(combinedKeysObject);
+
   // Create a regex pattern to identify placeholders within {}
   const placeholderPattern = /{([^}]+)}/g;
 
@@ -9,10 +23,10 @@ export function replacePlaceholders(child, brand) {
 
   const updatedText = child.name.replace(placeholderPattern, (match, key) => {
     let replaced = match; // Default to not replacing
-    // Check each brand key to see if it's included in the placeholder key
-    for (const brandKey of brandKeys) {
-      if (key.includes(brandKey) && brand.hasOwnProperty(brandKey)) {
-        replaced = brand[brandKey];
+    // Check each combined key to see if it's included in the placeholder key
+    for (const combinedKey of combinedKeys) {
+      if (key.includes(combinedKey) && combinedKeysObject.hasOwnProperty(combinedKey)) {
+        replaced = combinedKeysObject[combinedKey];
         replacementsMade = true;
         break; // Once a replacement is made, no need to check further
       }

@@ -26,12 +26,17 @@ export async function updateDesignWithBrand({
   withPreview,
   user,
   previewOptions = { pixelRatio: 0.5 },
+  additional,
 }) {
+  if (!design) {
+    throw new Error('Design is required');
+  }
+
   // mimeType: 'image/jpg'
   for (const page of design.pages) {
     await Promise.all(
       page.children.map((child) =>
-        processChild({ child, brand, withPreview, user }),
+        processChild({ child, brand, additional, withPreview, user }),
       ),
     )
   }
@@ -52,9 +57,9 @@ export async function updateDesignWithBrand({
   return design
 }
 
-export async function processChild({ child, brand, withPreview, user }) {
+export async function processChild({ child, brand, additional, withPreview, user }) {
   if (child.type === 'text') {
-    replacePlaceholders(child, brand)
+    replacePlaceholders({child, brand, additional})
     updateFontStyle(child, brand)
 
     // missing here is capital letters, custom fonts and register fonts

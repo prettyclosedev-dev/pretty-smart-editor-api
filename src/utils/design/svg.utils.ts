@@ -235,8 +235,11 @@ export async function updateImageAttributes(child, brand, user) {
 
     var mutateColors = elementTypeIncluded || !colorScheme // if not color scheme means only a color is provided
 
+    let isBrandSvg = false;
+
     // Update the src attribute based on the name of the element
     if (elementTypeIncluded && brand[elementType]) {
+      isBrandSvg = true;
       if (/^https?:\/\//.test(brand[elementType])) {
         fetchedAsset = await fetchImage(brand[elementType])
       } else {
@@ -324,7 +327,10 @@ export async function updateImageAttributes(child, brand, user) {
       finalSvg = await getOptimizedSVG(finalSvg, brand)
 
       // replace width height
-      finalSvg = updateSvgDimensions(finalSvg, child.width, child.height)
+      if (isBrandSvg) {
+        finalSvg = updateSvgDimensions(finalSvg, child.width, child.height)
+      }
+      
       const base64EncodedSvg = btoa(finalSvg)
 
       child.src = `data:image/svg+xml;base64,${base64EncodedSvg}`

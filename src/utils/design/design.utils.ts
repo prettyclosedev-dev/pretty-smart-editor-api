@@ -79,7 +79,7 @@ export async function processChild({ child, brand, additional, withPreview, user
   }
 
   if (child.type === 'svg' || child.type === 'image') {
-    await updateImageAttributes(child, brand, user)
+    await updateImageAttributes({child, brand, user, additional})
   }
 
   if (child.type === 'figure' || child.type === 'line') {

@@ -206,8 +206,32 @@ async function getOptimizedSVG(svg, brand) {
   return svg
 }
 
-export async function updateImageAttributes(child, brand, user) {
+export async function updateImageAttributes({
+  child,
+  brand,
+  user,
+  additional = {},
+}) {
   try {
+    // Function to check if a value is a URL, SVG, or base64-encoded image
+    const isValidValue = (value) => {
+      // Regular expression to check for URL or base64-encoded image
+      const urlOrBase64Regex =
+        /^(https?:\/\/|data:image\/(svg\+xml|png|jpeg|jpg);base64,)/
+      return urlOrBase64Regex.test(value)
+    }
+
+    // Filter additional object to include only keys with valid values
+    const filteredAdditional = Object.keys(additional).reduce((acc, key) => {
+      if (isValidValue(additional[key])) {
+        acc[key] = additional[key]
+      }
+      return acc
+    }, {})
+
+    // Merge brand with the filtered additional object
+    const combinedBrand = { ...brand, ...filteredAdditional }
+
     // add handle for image type and add avatar
     const elementColorSchemeMatch = child.name.match(/^\{(\w+?)(?:_(.+))?}$/)
     if (!elementColorSchemeMatch) return
@@ -215,15 +239,19 @@ export async function updateImageAttributes(child, brand, user) {
     const elementType = elementColorSchemeMatch[1]
     const colorScheme = elementColorSchemeMatch[2]
 
-    if (elementType === 'avatar' && user?.avatar?.length) { // && child.type === 'image'
-        child.src = user.avatar
-        return
+    if (elementType === 'avatar' && user?.avatar?.length) {
+      // && child.type === 'image'
+      child.src = user.avatar
+      return
     }
 
     let fetchedAsset = child.src
 
     if (child.src.startsWith('data:image/svg+xml;base64,')) {
-      const cleanedString = child.src.replace(/^data:image\/svg\+xml;base64,/, '')
+      const cleanedString = child.src.replace(
+        /^data:image\/svg\+xml;base64,/,
+        '',
+      )
       try {
         fetchedAsset = atob(cleanedString)
       } catch (error) {
@@ -231,19 +259,24 @@ export async function updateImageAttributes(child, brand, user) {
       }
     }
 
-    var elementTypeIncluded = ['logo', 'icon', 'wordmark'].includes(elementType)
+    var elementTypeIncluded = combinedBrand.hasOwnProperty(elementType)
 
-    var mutateColors = elementTypeIncluded || !colorScheme // if not color scheme means only a color is provided
+    var mutateColors = elementTypeIncluded || !colorScheme // if no color scheme that means only a color is provided
 
-    let isBrandSvg = false;
+    let isBrandSvg = false
 
     // Update the src attribute based on the name of the element
-    if (elementTypeIncluded && brand[elementType]) {
-      isBrandSvg = true;
-      if (/^https?:\/\//.test(brand[elementType])) {
-        fetchedAsset = await fetchImage(brand[elementType])
+    if (elementTypeIncluded) {
+      isBrandSvg = brand[elementType] // not in additional only from brand
+      if (/^https?:\/\//.test(combinedBrand[elementType])) {
+        if (isBrandSvg) {
+          fetchedAsset = await fetchImage(combinedBrand[elementType])
+        } else {
+          child.src = combinedBrand[elementType]
+          return
+        }
       } else {
-        child.src = brand[elementType]
+        child.src = combinedBrand[elementType]
       }
     }
 
@@ -330,7 +363,7 @@ export async function updateImageAttributes(child, brand, user) {
       if (isBrandSvg) {
         finalSvg = updateSvgDimensions(finalSvg, child.width, child.height)
       }
-      
+
       const base64EncodedSvg = btoa(finalSvg)
 
       child.src = `data:image/svg+xml;base64,${base64EncodedSvg}`

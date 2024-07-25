@@ -20,6 +20,7 @@ export const Design = objectType({
     t.model.public()
     t.model.tags()
     t.model.availableForBrands({ ordering: true, filtering: true, pagination: true })
+    t.model.favoredBy({ ordering: true, filtering: true, pagination: true })
   },
 })
 
@@ -31,27 +32,8 @@ export const Category = objectType({
     t.model.creator()
     t.model.public()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
-    t.model.templates({ ordering: true, filtering: true, pagination: true })
     t.model.tags()
     t.model.availableForBrands({ ordering: true, filtering: true, pagination: true })
-  },
-})
-
-export const Template = objectType({
-  name: 'Template',
-  definition(t) {
-    t.model.id()
-    t.model.name()
-    t.model.preview()
-    t.model.width()
-    t.model.height()
-    t.model.publishedDate()
-    t.model.editedDate()
-    t.model.categories({ ordering: true, filtering: true, pagination: true })
-    t.model.creator()
-    t.model.html()
-    t.model.public()
-    t.model.description()
-    t.model.tags()
+    t.model.availableOnPages()
   },
 })

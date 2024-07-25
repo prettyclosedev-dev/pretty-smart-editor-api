@@ -244,20 +244,6 @@ export const Query = queryType({
       },
     })
 
-    t.crud.template()
-    t.crud.templates({ filtering: true, ordering: true, pagination: true })
-    t.nullable.field('templatesCount', {
-      type: 'Int',
-      args: {
-        where: 'TemplateWhereInput',
-      },
-      resolve: (parent, args, ctx) => {
-        return ctx.prisma.template.count({
-          where: args.where,
-        })
-      },
-    })
-
     t.crud.user()
     t.crud.users({ filtering: true, ordering: true, pagination: true })
     t.nullable.field('usersCount', {

@@ -9,7 +9,7 @@ export const User = objectType({
     t.model.avatar()
     t.model.role()
     t.model.designs({ ordering: true, filtering: true, pagination: true })
-    t.model.templates({ ordering: true, filtering: true, pagination: true })
     t.model.brands({ ordering: true, filtering: true, pagination: true })
+    t.model.favorites({ ordering: true, filtering: true, pagination: true })
   },
 })

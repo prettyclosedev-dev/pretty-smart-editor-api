@@ -29,8 +29,8 @@ model User {
   designs   Design[]
   role      UserRole   @default(VIEWER)
   Category  Category[]
-  templates Template[]
   brands    Brand[]
+  favorites Design[]   @relation("DesignUsersRelation")
 }
 
 model Color {
@@ -92,9 +92,9 @@ model Category {
   creatorId          Int?
   public             Boolean?   @default(false)
   designs            Design[]
-  templates          Template[]
   tags               String[]
   availableForBrands Brand[]    @relation("CategoriesBrandRelation")
+  availableOnPages   String[]
 }
 
 model Design {
@@ -116,21 +116,5 @@ model Design {
   creatorId          Int?
   tags               String[]
   availableForBrands Brand[]    @relation("DesignsBrandRelation")
-}
-
-model Template {
-  id            Int        @id @default(autoincrement())
-  name          String
-  categories    Category[]
-  publishedDate DateTime   @default(now())
-  editedDate    DateTime   @default(now())
-  width         Int
-  height        Int
-  html          String
-  preview       String
-  public        Boolean?   @default(false)
-  creator       User?      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  creatorId     Int?
-  description   String
-  tags          String[]
+  favoredBy          User[]     @relation("DesignUsersRelation")
 }

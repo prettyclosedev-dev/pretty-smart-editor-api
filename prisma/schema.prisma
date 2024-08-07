@@ -95,6 +95,8 @@ model Category {
   tags               String[]
   availableForBrands Brand[]    @relation("CategoriesBrandRelation")
   availableOnPages   String[]
+  icon               String?
+  description        String?
 }
 
 model Design {

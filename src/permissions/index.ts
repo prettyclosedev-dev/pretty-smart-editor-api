@@ -93,6 +93,7 @@ export const permissions = shield(
       deleteManyUser: rules.isAuthenticated,
       deleteManyCategory: rules.isAuthenticated,
       deleteManyBrand: rules.isAuthenticated,
+      uploadCategoryIcon: rules.isAuthenticated,
     },
   },
   {

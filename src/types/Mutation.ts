@@ -1,6 +1,22 @@
 import { Prisma, PrismaPromise } from '@prisma/client'
-import { list, mutationType, nonNull, nullable, stringArg } from 'nexus'
-import { importUser, searchProcessesAsync, startImportProcessAsync } from '../utils/general'
+import {
+  arg,
+  intArg,
+  list,
+  mutationType,
+  nonNull,
+  nullable,
+  stringArg,
+} from 'nexus'
+import {
+  importUser,
+  searchProcessesAsync,
+  startImportProcessAsync,
+} from '../utils/general'
+import { Upload } from './Upload'
+import { v4 as uuidv4 } from 'uuid'
+import * as fs from 'fs'
+import * as path from 'path'
 
 export const Mutation = mutationType({
   definition(t) {
@@ -109,7 +125,7 @@ export const Mutation = mutationType({
         }
       },
     })
-    
+
     // Update
     t.crud.updateOneClient()
     t.crud.updateOneDesign()
@@ -149,5 +165,64 @@ export const Mutation = mutationType({
     t.crud.upsertOneCategory()
     t.crud.upsertOneUser()
     t.crud.upsertOneBrand()
+
+    t.field('uploadCategoryIcon', {
+      type: 'String',
+      args: {
+        file: nonNull(arg({ type: 'Upload' })),
+        categoryId: nonNull(intArg()),
+      },
+      resolve: async (_parent, { file, categoryId }, ctx) => {
+        const { createReadStream, filename, mimetype, encoding } = await file
+        const stream = createReadStream()
+
+        // Fetch category by ID to get the name
+        const category = await ctx.prisma.category.findUnique({
+          where: { id: categoryId },
+        })
+
+        if (!category) {
+          throw new Error(`Category with ID ${categoryId} not found.`)
+        }
+
+        const categoryName = category.name
+        const iconDir = path.join(
+          __dirname,
+          '../../uploads/icons/categories',
+          categoryName,
+        )
+        const uniqueFilename = `${uuidv4()}-${filename}`
+        const filePath = path.join(iconDir, uniqueFilename)
+
+        if (!fs.existsSync(iconDir)) {
+          fs.mkdirSync(iconDir, { recursive: true })
+        }
+
+        await new Promise((resolve, reject) => {
+          const writeStream = fs.createWriteStream(filePath)
+          stream.on('error', (error) => {
+            if (writeStream) {
+              writeStream.destroy(error)
+            }
+            reject(error)
+          })
+
+          stream
+            .pipe(writeStream)
+            .on('error', (error) => reject(error))
+            .on('finish', () => resolve(filePath))
+        })
+
+        const baseUrl = 'https://clyps.io'
+
+        const url = baseUrl + `/uploads/icons/categories/${categoryName}/${uniqueFilename}`
+        await ctx.prisma.category.update({
+          where: { id: categoryId },
+          data: { icon: url },
+        })
+
+        return url
+      },
+    })
   },
 })

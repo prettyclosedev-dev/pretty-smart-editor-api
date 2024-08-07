@@ -9,6 +9,7 @@ import { schema } from './schema'
 import * as basicAuth from 'express-basic-auth'
 import * as cors from 'cors'
 import * as path from 'path'
+import { graphqlUploadExpress } from 'graphql-upload-ts';
 
 require('dotenv').config()
 
@@ -81,6 +82,7 @@ async function startApolloServer() {
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   app.use(express.json({ limit: '50mb' }));
   app.use(cors())
+  app.use(graphqlUploadExpress());
 
   server.applyMiddleware({ app })
 

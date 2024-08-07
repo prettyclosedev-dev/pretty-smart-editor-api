@@ -35,5 +35,7 @@ export const Category = objectType({
     t.model.tags()
     t.model.availableForBrands({ ordering: true, filtering: true, pagination: true })
     t.model.availableOnPages()
+    t.model.icon()
+    t.model.description()
   },
 })

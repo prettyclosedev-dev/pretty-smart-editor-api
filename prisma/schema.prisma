@@ -97,6 +97,8 @@ model Category {
   availableOnPages   String[]
   icon               String?
   description        String?
+  color              String?
+  form               String?
 }
 
 model Design {

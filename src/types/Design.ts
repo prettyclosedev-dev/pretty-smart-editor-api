@@ -37,5 +37,7 @@ export const Category = objectType({
     t.model.availableOnPages()
     t.model.icon()
     t.model.description()
+    t.model.color()
+    t.model.form()
   },
 })

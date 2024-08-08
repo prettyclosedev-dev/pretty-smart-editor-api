@@ -27,24 +27,19 @@ const svgOutputSettings = {
   ],
 }
 
-export async function fetchAndSetImage(attribute, srcUrl, child) {
-  try {
-    const response = await fetch(srcUrl)
-    const svgText = await response.text()
-    const base64EncodedSvg = btoa(svgText)
-    child[attribute] = `data:image/svg+xml;base64,${base64EncodedSvg}`
-  } catch (error) {
-    console.error('Error fetching image:', error)
-  }
-}
-
 export async function fetchImage(srcUrl) {
   try {
     const response = await fetch(srcUrl)
-    const svgText = await response.text()
-    return svgText
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`)
+      return null
+    } else {
+      const svgText = await response.text()
+      return svgText
+    }
   } catch (error) {
     console.error('Error fetching image:', error)
+    return null // Return null or handle as per your application's needs
   }
 }
 
@@ -270,7 +265,12 @@ export async function updateImageAttributes({
       isBrandSvg = brand[elementType] // not in additional only from brand
       if (/^https?:\/\//.test(combinedBrand[elementType])) {
         if (isBrandSvg) {
-          fetchedAsset = await fetchImage(combinedBrand[elementType])
+          console.log('fetching asset', combinedBrand[elementType])
+          try {
+            fetchedAsset = await fetchImage(combinedBrand[elementType])
+          } catch (e) {
+            console.log('Error fetching asset:', e)
+          }
         } else {
           child.src = combinedBrand[elementType]
           return

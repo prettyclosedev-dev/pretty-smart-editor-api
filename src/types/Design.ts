@@ -39,5 +39,6 @@ export const Category = objectType({
     t.model.description()
     t.model.color()
     t.model.form()
+    t.model.size()
   },
 })

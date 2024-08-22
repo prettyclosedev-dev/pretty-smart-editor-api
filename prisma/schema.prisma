@@ -99,6 +99,7 @@ model Category {
   description        String?
   color              String?
   form               String?
+  size               Int?
 }
 
 model Design {

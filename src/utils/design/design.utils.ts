@@ -59,7 +59,7 @@ export async function updateDesignWithBrand({
 
 export async function processChild({ child, brand, additional, withPreview, user }) {
   if (child.type === 'text') {
-    replacePlaceholders({child, brand, additional})
+    replacePlaceholders({child, user, brand, additional})
     updateFontStyle(child, brand)
 
     // missing here is capital letters, custom fonts and register fonts

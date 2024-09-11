@@ -11,7 +11,7 @@ const { createCanvas, registerFont } = require('canvas')
 // date
 // mortgage_rate
 
-export function replacePlaceholders({child, brand, additional = {}}) {
+export function replacePlaceholders({child, user, brand, additional = {}}) {
   // Merge brand and additional objects. Properties in additional will overwrite those in brand if there's a conflict.
   const combinedKeysObject = {...brand, ...additional};
   const combinedKeys = Object.keys(combinedKeysObject);
@@ -23,12 +23,19 @@ export function replacePlaceholders({child, brand, additional = {}}) {
 
   const updatedText = child.name.replace(placeholderPattern, (match, key) => {
     let replaced = match; // Default to not replacing
-    // Check each combined key to see if it's included in the placeholder key
-    for (const combinedKey of combinedKeys) {
-      if (key.includes(combinedKey) && combinedKeysObject.hasOwnProperty(combinedKey)) {
-        replaced = combinedKeysObject[combinedKey];
-        replacementsMade = true;
-        break; // Once a replacement is made, no need to check further
+
+    // If the placeholder is "name", prioritize user firstName and lastName
+    if (key.includes('name') && user && user.name) {
+      replaced = user.name;
+      replacementsMade = true;
+    } else {
+      // Check each combined key to see if it's included in the placeholder key
+      for (const combinedKey of combinedKeys) {
+        if (key.includes(combinedKey) && combinedKeysObject.hasOwnProperty(combinedKey)) {
+          replaced = combinedKeysObject[combinedKey];
+          replacementsMade = true;
+          break; // Once a replacement is made, no need to check further
+        }
       }
     }
     return replaced;

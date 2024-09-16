@@ -27,6 +27,7 @@ export const Mutation = mutationType({
     t.crud.createOneCategory()
     t.crud.createOneUser()
     t.crud.createOneBrand()
+    t.crud.createOneForm()
 
     // Many
     t.field('createManyClient', {
@@ -125,6 +126,22 @@ export const Mutation = mutationType({
         }
       },
     })
+    t.field('createManyForm', {
+      type: 'Boolean',
+      args: {
+        data: nonNull(list('FormCreateInput')),
+      },
+      resolve: async (_parent, { data }, ctx) => {
+        try {
+          const success = await ctx.prisma.form.createMany({
+            data,
+          })
+          return !!success
+        } catch (e) {
+          return e
+        }
+      },
+    })
 
     // Update
     t.crud.updateOneClient()
@@ -133,6 +150,7 @@ export const Mutation = mutationType({
     t.crud.updateOneCategory()
     t.crud.updateOneUser()
     t.crud.updateOneBrand()
+    t.crud.updateOneForm()
 
     // Many
     t.crud.updateManyClient()
@@ -141,6 +159,7 @@ export const Mutation = mutationType({
     t.crud.updateManyCategory()
     t.crud.updateManyUser()
     t.crud.updateManyBrand()
+    t.crud.updateManyForm()
 
     // Delete
     t.crud.deleteOneClient()
@@ -149,6 +168,7 @@ export const Mutation = mutationType({
     t.crud.deleteOneCategory()
     t.crud.deleteOneUser()
     t.crud.deleteOneBrand()
+    t.crud.deleteOneForm()
 
     // Many
     t.crud.deleteManyClient()
@@ -157,6 +177,7 @@ export const Mutation = mutationType({
     t.crud.deleteManyCategory()
     t.crud.deleteManyUser()
     t.crud.deleteManyBrand()
+    t.crud.deleteManyForm()
 
     // Upsert
     t.crud.upsertOneClient()
@@ -165,6 +186,7 @@ export const Mutation = mutationType({
     t.crud.upsertOneCategory()
     t.crud.upsertOneUser()
     t.crud.upsertOneBrand()
+    t.crud.upsertOneForm()
 
     t.field('uploadCategoryIcon', {
       type: 'String',

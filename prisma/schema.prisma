@@ -123,3 +123,23 @@ model Design {
   availableForBrands Brand[]    @relation("DesignsBrandRelation")
   favoredBy          User[]     @relation("DesignUsersRelation")
 }
+
+model Form {
+  id         Int        @id @default(autoincrement())
+  title      String
+  subTitle   String?
+  image      String?
+  fields     FormField[]
+  createdAt  DateTime   @default(now())
+}
+
+model FormField {
+  id          Int      @id @default(autoincrement())
+  form        Form     @relation(fields: [formId], references: [id])
+  formId      Int
+  name        String
+  placeholder String?
+  max         Int?
+  value       String?
+}
+

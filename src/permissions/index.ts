@@ -23,6 +23,11 @@ export const permissions = shield(
       designs: rules.isAuthenticated,
       designsCount: rules.isAuthenticated,
 
+      // forms
+      form: rules.isAuthenticated,
+      forms: rules.isAuthenticated,
+      formsCount: rules.isAuthenticated,
+
       // pages
       // page: rules.isAuthenticated,
       // pages: rules.isAuthenticated,
@@ -51,6 +56,7 @@ export const permissions = shield(
       createOneCategory: rules.isAuthenticated,
       createOneUser: rules.isAuthenticated,
       createOneBrand: rules.isAuthenticated,
+      createOneForm: rules.isAuthenticated,
       // Create many
       createManyClient: rules.isAuthenticated,
       createManyUser: rules.isAuthenticated,
@@ -58,6 +64,7 @@ export const permissions = shield(
       createManyDesign: rules.isAuthenticated,
       // createManyPage: rules.isAuthenticated,
       createManyBrand: rules.isAuthenticated,
+      createManyForm: rules.isAuthenticated,
       // Update one
       updateOneClient: rules.isAuthenticated,
       updateOneDesign: rules.isAuthenticated,
@@ -65,6 +72,7 @@ export const permissions = shield(
       updateOneCategory: rules.isAuthenticated,
       updateOneUser: rules.isAuthenticated,
       updateOneBrand: rules.isAuthenticated,
+      updateOneForm: rules.isAuthenticated,
       // Update many
       updateManyClient: rules.isAuthenticated,
       updateManyDesign: rules.isAuthenticated,
@@ -72,6 +80,7 @@ export const permissions = shield(
       updateManyCategory: rules.isAuthenticated,
       updateManyUser: rules.isAuthenticated,
       updateManyBrand: rules.isAuthenticated,
+      updateManyForm: rules.isAuthenticated,
       // Upsert one
       upsertOneClient: rules.isAuthenticated,
       upsertOneDesign: rules.isAuthenticated,
@@ -79,6 +88,7 @@ export const permissions = shield(
       upsertOneCategory: rules.isAuthenticated,
       upsertOneUser: rules.isAuthenticated,
       upsertOneBrand: rules.isAuthenticated,
+      upsertOneForm: rules.isAuthenticated,
       // Delete one
       deleteOneClient: rules.isAuthenticated,
       deleteOneDesign: rules.isAuthenticated,
@@ -86,6 +96,7 @@ export const permissions = shield(
       deleteOneUser: rules.isAuthenticated,
       deleteOneCategory: rules.isAuthenticated,
       deleteOneBrand: rules.isAuthenticated,
+      deleteOneForm: rules.isAuthenticated,
       // Delete many
       deleteManyClient: rules.isAuthenticated,
       deleteManyDesign: rules.isAuthenticated,
@@ -93,6 +104,8 @@ export const permissions = shield(
       deleteManyUser: rules.isAuthenticated,
       deleteManyCategory: rules.isAuthenticated,
       deleteManyBrand: rules.isAuthenticated,
+      deleteManyForm: rules.isAuthenticated,
+      // upload category icons
       uploadCategoryIcon: rules.isAuthenticated,
     },
   },

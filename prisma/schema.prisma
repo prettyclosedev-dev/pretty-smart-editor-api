@@ -142,6 +142,7 @@ model FormField {
   max         Int?
   key         String?  
   required    Boolean  @default(false)
+  index       Int?
 }
 
 

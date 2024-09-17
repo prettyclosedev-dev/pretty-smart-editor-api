@@ -22,5 +22,6 @@ export const FormField = objectType({
     t.model.key();
     t.model.required();
     t.model.form();
+    t.model.index();
   },
 });

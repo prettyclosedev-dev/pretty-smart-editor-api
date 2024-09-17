@@ -6,7 +6,7 @@ export const Form = objectType({
     t.model.id();
     t.model.title();
     t.model.subTitle();
-    t.model.image();
+    t.model.hasImage();
     t.model.fields({ ordering: true, filtering: true, pagination: true });
     t.model.createdAt();
   },
@@ -16,9 +16,11 @@ export const FormField = objectType({
   name: 'FormField',
   definition(t) {
     t.model.id();
-    t.model.name();
+    t.model.title();
     t.model.placeholder();
     t.model.max();
-    t.model.value();
+    t.model.key();
+    t.model.required();
+    t.model.form();
   },
 });

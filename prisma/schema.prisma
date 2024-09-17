@@ -128,7 +128,7 @@ model Form {
   id         Int        @id @default(autoincrement())
   title      String
   subTitle   String?
-  image      String?
+  hasImage   Boolean     @default(false)
   fields     FormField[]
   createdAt  DateTime   @default(now())
 }
@@ -137,9 +137,11 @@ model FormField {
   id          Int      @id @default(autoincrement())
   form        Form     @relation(fields: [formId], references: [id])
   formId      Int
-  name        String
+  title       String
   placeholder String?
   max         Int?
-  value       String?
+  key         String?  
+  required    Boolean  @default(false)
 }
+
 

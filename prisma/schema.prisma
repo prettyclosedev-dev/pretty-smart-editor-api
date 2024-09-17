@@ -135,7 +135,7 @@ model Form {
 
 model FormField {
   id          Int      @id @default(autoincrement())
-  form        Form     @relation(fields: [formId], references: [id])
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   formId      Int
   title       String
   placeholder String?

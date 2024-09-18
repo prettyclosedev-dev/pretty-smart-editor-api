@@ -25,36 +25,46 @@ export async function updateDesignWithBrand({
   brand,
   withPreview,
   user,
-  previewOptions = { pixelRatio: 0.5 },
+  previewOptions = { pixelRatio: 0.5, mimeType: 'image/png' },
   additional,
 }) {
   if (!design) {
     throw new Error('Design is required');
   }
 
-  // mimeType: 'image/jpg'
+  // Process each page and its children
   for (const page of design.pages) {
     await Promise.all(
       page.children.map((child) =>
         processChild({ child, brand, additional, withPreview, user }),
       ),
-    )
+    );
   }
 
+  // Generate preview if requested
   if (withPreview) {
     try {
       const instance = await createInstance({
         key: process.env.POLOTNO_KEY,
-      })
-      const data = await instance.jsonToImageBase64(design, previewOptions)
-      design.preview = data
+      });
+
+      let data;
+      if (previewOptions.mimeType === 'application/pdf') {
+        // Generate PDF preview
+        data = await instance.jsonToPDFBase64(design, previewOptions);
+      } else {
+        // Generate image preview (JPEG or PNG)
+        data = await instance.jsonToImageBase64(design, previewOptions);
+      }
+
+      design.preview = data;
       instance.close();
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
   }
 
-  return design
+  return design;
 }
 
 export async function processChild({ child, brand, additional, withPreview, user }) {

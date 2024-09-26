@@ -1,4 +1,22 @@
+import { getRates } from '../data/mortgage'
 const { createCanvas, registerFont } = require('canvas')
+
+export async function smartReplacement({ key, brand }) {
+  if (key.includes('_interest_rate')) {
+    const rates = await getRates({ brand })
+    const rateMapping = {
+      ai_interest_rate_30: rates.rate_30,
+      ai_interest_rate_15: rates.rate_15,
+      ai_interest_rate_chart: rates.rate_chart,
+      ai_interest_rate_graph: rates.rate_graph,
+    }
+
+    // Check if key contains any of the base rate identifiers
+    const baseKey = Object.keys(rateMapping).find((base) => key.includes(base))
+    return rateMapping[baseKey] || key
+  }
+  return key
+}
 
 // The following can be passed in additional to be replace if passed and found matching child.name
 // amount
@@ -11,35 +29,53 @@ const { createCanvas, registerFont } = require('canvas')
 // date
 // mortgage_rate
 
-export function replacePlaceholders({child, user, brand, additional = {}}) {
+export async function replacePlaceholders({
+  child,
+  user,
+  brand,
+  additional = {},
+}) {
   // Merge brand and additional objects. Properties in additional will overwrite those in brand if there's a conflict.
-  const combinedKeysObject = {...brand, ...additional};
-  const combinedKeys = Object.keys(combinedKeysObject);
+  const combinedKeysObject = { ...brand, ...additional }
+  const combinedKeys = Object.keys(combinedKeysObject)
 
   // Create a regex pattern to identify placeholders within {}
-  const placeholderPattern = /{([^}]+)}/g;
+  const placeholderPattern = /{([^}]+)}/g
 
-  let replacementsMade = false;
+  let replacementsMade = false
 
-  const updatedText = child.name.replace(placeholderPattern, (match, key) => {
+  // Use a loop to handle async replacements
+  let updatedText = child.name;
+  const matches = updatedText.match(placeholderPattern) || [];
+
+  for (const match of matches) {
+    const key = match.slice(1, -1); // Remove the curly braces from the placeholder
     let replaced = match; // Default to not replacing
 
-    // If the placeholder is "name", prioritize user firstName and lastName
-    if (key.includes('name') && user && user.name) {
+    if (key.startsWith('ai_')) {
+      replaced = await smartReplacement({ key, brand }); // Fetch rate or chart info
+      replacementsMade = true;
+    } else if (key.includes('name') && user && user.name) {
+      // If the placeholder is "name", prioritize user firstName and lastName
       replaced = user.name;
       replacementsMade = true;
     } else {
       // Check each combined key to see if it's included in the placeholder key
       for (const combinedKey of combinedKeys) {
-        if (key.includes(combinedKey) && combinedKeysObject.hasOwnProperty(combinedKey)) {
+        if (
+          key.includes(combinedKey) &&
+          combinedKeysObject.hasOwnProperty(combinedKey)
+        ) {
           replaced = combinedKeysObject[combinedKey];
           replacementsMade = true;
           break; // Once a replacement is made, no need to check further
         }
       }
     }
-    return replaced;
-  });
+
+    // Replace the placeholder with the resolved value
+    updatedText = updatedText.replace(match, replaced);
+  }
 
   // Only update child.text if replacements were made
   if (replacementsMade) {

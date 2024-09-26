@@ -1,3 +1,4 @@
+import { getRateImages } from '../data/mortgage'
 import {
   findColorByPrimary,
   getColor,
@@ -201,6 +202,19 @@ async function getOptimizedSVG(svg, brand) {
   return svg
 }
 
+async function smartReplacement({key, brand}) {
+  if (key.includes('_interest_rate')) {
+    const rateImages = await getRateImages({brand})
+    const rateMapping = {
+      ai_interest_rate_chart: rateImages.rate_chart,
+      ai_interest_rate_graph: rateImages.rate_graph,
+      ai_interest_rate_range: rateImages.rate_range,
+    }
+
+    return rateMapping[key] || key;
+  }
+}
+
 export async function updateImageAttributes({
   child,
   brand,
@@ -233,6 +247,11 @@ export async function updateImageAttributes({
 
     const elementType = elementColorSchemeMatch[1]
     const colorScheme = elementColorSchemeMatch[2]
+
+    if (child.name.includes("ai_")) { // elementType.startsWith('ai')
+      child.src = await smartReplacement({key: `${elementType}_${colorScheme}`, brand});
+      return;
+    }
 
     if (elementType === 'avatar' && user?.avatar?.length) {
       // && child.type === 'image'

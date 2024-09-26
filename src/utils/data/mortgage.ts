@@ -192,11 +192,20 @@ export async function getRateImages({ brand }) {
 
     // Fetch large chart image
     const large_chart_url = `https://shot.screenshotapi.net/screenshot?token=PMR3BHX-AMKMW7D-J35XS5Z-0AD25DW&url=https%3A%2F%2Fwww.mortgagenewsdaily.com%2Fcharts%2Fembed%2Fmnd-mtg-rates-30&full_page=true&fresh=true&output=json&file_type=png&wait_for_event=load`
-    const { data: large_chart_data } = await axios.get(large_chart_url)
-    if (large_chart_data) {
-      if (large_chart_data.screenshot) {
-        images.rate_graph = large_chart_data.screenshot
+    try {
+      const { data: large_chart_data } = await axios.get(large_chart_url)
+      if (large_chart_data && large_chart_data.screenshot) {
+        const { data: imageData } = await axios.get(large_chart_data.screenshot, {
+          responseType: 'arraybuffer',
+        })
+        const base64Image = Buffer.from(imageData, 'binary').toString('base64')
+        images.rate_graph = `data:image/png;base64,${base64Image}`
       }
+    } catch (error) {
+      console.error(
+        'Error fetching and converting the large chart image:',
+        error,
+      )
     }
 
     // Generate rate range image

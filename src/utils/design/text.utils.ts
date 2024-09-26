@@ -1,21 +1,42 @@
 import { getRates } from '../data/mortgage'
+import { getTimeByType } from '../data/times'
 const { createCanvas, registerFont } = require('canvas')
 
 export async function smartReplacement({ key, brand }) {
-  if (key.includes('_interest_rate')) {
-    const rates = await getRates({ brand })
-    const rateMapping = {
-      ai_interest_rate_30: rates.rate_30,
-      ai_interest_rate_15: rates.rate_15,
-      ai_interest_rate_chart: rates.rate_chart,
-      ai_interest_rate_graph: rates.rate_graph,
+  try {
+    if (key.includes('ai_interest_rate')) {
+      const rates = await getRates({ brand })
+      const rateMapping = {
+        ai_interest_rate_30: rates.rate_30,
+        ai_interest_rate_15: rates.rate_15,
+        ai_interest_rate_chart: rates.rate_chart,
+        ai_interest_rate_graph: rates.rate_graph,
+      }
+
+      // Check if key contains any of the base rate identifiers
+      const baseKey = Object.keys(rateMapping).find((base) =>
+        key.includes(base),
+      )
+      return rateMapping[baseKey] || key
+    } else if (key.includes('ai_times')) {
+      const timePattern = /ai_times_(\w+)_([\w\s]+)_(\w+)/
+      const match = key.match(timePattern)
+
+      if (match) {
+        const [, timeType, location, additional] = match
+        console.log(
+          `TimeType: ${timeType}, Location: ${location}, Additional: ${additional}`,
+        )
+
+        return await getTimeByType(location, timeType)
+      }
     }
 
-    // Check if key contains any of the base rate identifiers
-    const baseKey = Object.keys(rateMapping).find((base) => key.includes(base))
-    return rateMapping[baseKey] || key
+    return key
+  } catch (e) {
+    console.error(e)
+    return key
   }
-  return key
 }
 
 // The following can be passed in additional to be replace if passed and found matching child.name
@@ -45,20 +66,20 @@ export async function replacePlaceholders({
   let replacementsMade = false
 
   // Use a loop to handle async replacements
-  let updatedText = child.name;
-  const matches = updatedText.match(placeholderPattern) || [];
+  let updatedText = child.name
+  const matches = updatedText.match(placeholderPattern) || []
 
   for (const match of matches) {
-    const key = match.slice(1, -1); // Remove the curly braces from the placeholder
-    let replaced = match; // Default to not replacing
+    const key = match.slice(1, -1) // Remove the curly braces from the placeholder
+    let replaced = match // Default to not replacing
 
     if (key.startsWith('ai_')) {
-      replaced = await smartReplacement({ key, brand }); // Fetch rate or chart info
-      replacementsMade = true;
+      replaced = await smartReplacement({ key, brand }) // Fetch rate or chart info
+      replacementsMade = true
     } else if (key.includes('name') && user && user.name) {
       // If the placeholder is "name", prioritize user firstName and lastName
-      replaced = user.name;
-      replacementsMade = true;
+      replaced = user.name
+      replacementsMade = true
     } else {
       // Check each combined key to see if it's included in the placeholder key
       for (const combinedKey of combinedKeys) {
@@ -66,20 +87,20 @@ export async function replacePlaceholders({
           key.includes(combinedKey) &&
           combinedKeysObject.hasOwnProperty(combinedKey)
         ) {
-          replaced = combinedKeysObject[combinedKey];
-          replacementsMade = true;
-          break; // Once a replacement is made, no need to check further
+          replaced = combinedKeysObject[combinedKey]
+          replacementsMade = true
+          break // Once a replacement is made, no need to check further
         }
       }
     }
 
     // Replace the placeholder with the resolved value
-    updatedText = updatedText.replace(match, replaced);
+    updatedText = updatedText.replace(match, replaced)
   }
 
   // Only update child.text if replacements were made
   if (replacementsMade) {
-    child.text = updatedText;
+    child.text = updatedText
   }
   // If no replacements were made, child.text remains unchanged
 }

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
+    "@hebcal/core": "^5.5.0",
     "@mercurialweb/nexus-plugin-prisma": "5.9.1",
     "@prisma/client": "5.9.1",
     "apollo-server": "2.19.1",

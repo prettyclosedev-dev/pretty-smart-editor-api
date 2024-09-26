@@ -30,8 +30,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-require('dotenv').config()
-
 export const Query = queryType({
   definition(t) {
     t.crud.client()

@@ -284,7 +284,6 @@ export async function updateImageAttributes({
       isBrandSvg = brand[elementType] // not in additional only from brand
       if (/^https?:\/\//.test(combinedBrand[elementType])) {
         if (isBrandSvg) {
-          console.log('fetching asset', combinedBrand[elementType])
           try {
             fetchedAsset = await fetchImage(combinedBrand[elementType])
           } catch (e) {

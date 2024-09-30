@@ -24,10 +24,6 @@ export async function smartReplacement({ key, brand }) {
 
       if (match) {
         const [, timeType, location, additional] = match
-        console.log(
-          `TimeType: ${timeType}, Location: ${location}, Additional: ${additional}`,
-        )
-
         return await getTimeByType(location, timeType)
       }
     }

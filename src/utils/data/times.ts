@@ -12,7 +12,7 @@ async function fetchGeolocation(location) {
     location,
   )}&key=${googleApiKey}`
   const geoResponse = await axios.get(geoUrl)
-console.log('geoResponse', geoResponse)
+
   if (!geoResponse.data.results || !geoResponse.data.results.length) {
     throw new Error('Location not found')
   }
@@ -36,7 +36,6 @@ console.log('geoResponse', geoResponse)
 // Function to dynamically fetch times based on type (e.g., candlelighting, tzeis)
 export async function getTimeByType(location, timeType) {
   const { latitude, longitude, timezone } = await fetchGeolocation(location)
-  console.log('latitude', latitude, 'longitude', longitude, 'timezone', timezone)
   const gloc = new GeoLocation(null, latitude, longitude, 0, timezone)
   const zmanim = new Zmanim(gloc, new Date(), false) // Current date
 
@@ -54,5 +53,13 @@ export async function getTimeByType(location, timeType) {
       throw new Error(`Unsupported timeType: ${timeType}`)
   }
 
-  return Zmanim.formatISOWithTimeZone(timezone, time)
+  // Convert the time to a 12-hour format
+  const formattedTime = new Date(time).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+    timeZone: timezone
+  })
+
+  return formattedTime
 }

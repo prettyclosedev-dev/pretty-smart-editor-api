@@ -20,9 +20,9 @@ import { updateDesignWithBrand } from '../utils/design/design.utils'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { createInstance } from 'polotno-node';
+import { createInstance } from 'polotno-node'
 
-import OpenAI from 'openai';
+import OpenAI from 'openai'
 
 require('dotenv').config()
 
@@ -97,7 +97,13 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
-          let brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          let brand = args.brandWhere
+            ? user.brands?.find(
+                (b) =>
+                  b.id === args.brandWhere.id ||
+                  b.prettySmartId === args.brandWhere.prettySmartId,
+              ) || user.brands?.[0]
+            : user.brands?.[0]
           if (user.role === 'ADMIN' && args.brandWhere?.id) {
             brand = await ctx.prisma.brand.findUnique({
               where: {
@@ -112,20 +118,27 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
-          const updatedDesign = await updateDesignWithBrand({design, brand, additional: args.additional, withPreview: args.withPreview, previewOptions: args.previewOptions, user});
-          
-          const returnParams = args.returnParams || [];
+          const updatedDesign = await updateDesignWithBrand({
+            design,
+            brand,
+            additional: args.additional,
+            withPreview: args.withPreview,
+            previewOptions: args.previewOptions,
+            user,
+          })
+
+          const returnParams = args.returnParams || []
           if (returnParams?.length > 0) {
             const filteredDesign = returnParams.reduce((acc, key) => {
               if (key in updatedDesign) {
-                acc[key] = updatedDesign[key];
+                acc[key] = updatedDesign[key]
               }
-              return acc;
-            }, {});
-          
-            return filteredDesign;
+              return acc
+            }, {})
+
+            return filteredDesign
           } else {
-            return updatedDesign;
+            return updatedDesign
           }
         } catch (e) {
           throw e
@@ -146,7 +159,7 @@ export const Query = queryType({
         withPreview: nullable('Boolean'),
         previewOptions: nullable('Json'),
         additional: nullable('Json'),
-        returnParams: nullable(list('String'))
+        returnParams: nullable(list('String')),
       },
       resolve: async (parent, args, ctx) => {
         try {
@@ -177,7 +190,13 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
-          let brand = args.brandWhere ? user.brands?.find(b => b.id === args.brandWhere.id) || user.brands?.[0] : user.brands?.[0]
+          let brand = args.brandWhere
+            ? user.brands?.find(
+                (b) =>
+                  b.id === args.brandWhere.id ||
+                  b.prettySmartId === args.brandWhere.prettySmartId,
+              ) || user.brands?.[0]
+            : user.brands?.[0]
           if (user.role === 'ADMIN' && args.brandWhere?.id) {
             brand = await ctx.prisma.brand.findUnique({
               where: {
@@ -193,23 +212,33 @@ export const Query = queryType({
             throw new Error('No brand found for the user provided.')
           }
           const updatedDesigns = await Promise.all(
-            designs.map(async design => await updateDesignWithBrand({design, brand, additional: args.additional, withPreview: args.withPreview, previewOptions: args.previewOptions, user}))
-          );
-          
-          const returnParams = args.returnParams || [];
+            designs.map(
+              async (design) =>
+                await updateDesignWithBrand({
+                  design,
+                  brand,
+                  additional: args.additional,
+                  withPreview: args.withPreview,
+                  previewOptions: args.previewOptions,
+                  user,
+                }),
+            ),
+          )
+
+          const returnParams = args.returnParams || []
           if (returnParams.length > 0) {
-            const filteredDesigns = updatedDesigns.map(design => {
+            const filteredDesigns = updatedDesigns.map((design) => {
               return returnParams.reduce((acc, key) => {
                 if (key in design) {
-                  acc[key] = design[key];
+                  acc[key] = design[key]
                 }
-                return acc;
-              }, {});
-            });
-          
-            return filteredDesigns;
+                return acc
+              }, {})
+            })
+
+            return filteredDesigns
           } else {
-            return updatedDesigns; // returnParams is empty, return the full updatedDesigns array
+            return updatedDesigns // returnParams is empty, return the full updatedDesigns array
           }
         } catch (e) {
           throw e
@@ -294,7 +323,7 @@ export const Query = queryType({
         try {
           const instance = await createInstance({
             key: process.env.POLOTNO_KEY,
-          });
+          })
           const data = await instance.jsonToImageBase64(designJson, attrs)
           return data
         } catch (e) {
@@ -321,7 +350,7 @@ export const Query = queryType({
 
           const instance = await createInstance({
             key: process.env.POLOTNO_KEY,
-          });
+          })
           const data = await instance.jsonToImageBase64(designJson, attrs)
           return data
         } catch (e) {
@@ -364,7 +393,7 @@ export const Query = queryType({
           try {
             const instance = await createInstance({
               key: process.env.POLOTNO_KEY,
-            });
+            })
             let data
             if (mimeType === 'pdf') {
               if (dataType === 'base64') {

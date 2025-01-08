@@ -6,6 +6,7 @@ import { toggleFadeInAnimation } from 'polotno/canvas/use-fadein';
 import {
   unstable_setTextOverflow,
   unstable_useHtmlTextRender,
+  unstable_setTextVerticalResizeEnabled,
   onLoadError,
 } from 'polotno/config';
 
@@ -14,6 +15,7 @@ import { POLOTNO_KEY } from './config';
 
 toggleFadeInAnimation(false);
 unstable_setTextOverflow('change-font-size');
+unstable_setTextVerticalResizeEnabled(true);
 
 const key = new URLSearchParams(location.search).get('key');
 
@@ -25,6 +27,7 @@ window.store = store;
 window.config = {
   addGlobalFont,
   unstable_useHtmlTextRender,
+  unstable_setTextVerticalResizeEnabled,
   onLoadError,
 };
 

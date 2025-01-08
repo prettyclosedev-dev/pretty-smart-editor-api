@@ -70,20 +70,20 @@ export async function updateDesignWithBrand({
 export async function processChild({ child, brand, additional, withPreview, user }) {
   if (child.type === 'text') {
     await replacePlaceholders({child, user, brand, additional})
-    updateFontStyle(child, brand)
+    // updateFontStyle(child, brand)
 
-    // missing here is capital letters, custom fonts and register fonts
-    const newFontSize = await getDynamicFontSize({
-      text: child.text,
-      maxWidth: child.width,
-      maxHeight: child.height,
-      fontName: child.fontFamily,
-      fontSize: child.fontSize,
-      lineHeight: child.lineHeight,
-      fontVariants: buildFontVariants(child.fontStyle, child.fontWeight),
-    })
+    // // missing here is capital letters, custom fonts and register fonts
+    // const newFontSize = await getDynamicFontSize({
+    //   text: child.text,
+    //   maxWidth: child.width,
+    //   maxHeight: child.height,
+    //   fontName: child.fontFamily,
+    //   fontSize: child.fontSize,
+    //   lineHeight: child.lineHeight,
+    //   fontVariants: buildFontVariants(child.fontStyle, child.fontWeight),
+    // })
 
-    child.fontSize = newFontSize
+    // child.fontSize = newFontSize
 
     updateColorAttributes(child, brand)
   }

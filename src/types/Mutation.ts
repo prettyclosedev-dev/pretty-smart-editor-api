@@ -188,6 +188,48 @@ export const Mutation = mutationType({
     t.crud.upsertOneBrand()
     t.crud.upsertOneForm()
 
+    t.field('setCategoryPriority', {
+      type: 'Boolean',
+      args: {
+        categoryId: nonNull(intArg()),
+        newPriority: nonNull(intArg()),
+      },
+      resolve: async (_parent, { categoryId, newPriority }, ctx) => {
+        return await ctx.prisma.$transaction(async (prisma) => {
+          let currentPriority = newPriority;
+    
+          while (true) {
+            // Check if there is a conflict at the current priority
+            const conflictingCategory = await prisma.category.findUnique({
+              where: { priority: currentPriority },
+            });
+    
+            if (!conflictingCategory) {
+              // No conflict, exit the loop
+              break;
+            }
+    
+            // Increment the conflicting category's priority
+            await prisma.category.update({
+              where: { id: conflictingCategory.id },
+              data: { priority: currentPriority + 1 },
+            });
+    
+            // Move to the next priority to resolve further conflicts
+            currentPriority++;
+          }
+    
+          // Update the target category to the desired priority
+          await prisma.category.update({
+            where: { id: categoryId },
+            data: { priority: newPriority },
+          });
+    
+          return true;
+        });
+      },
+    });    
+
     t.field('uploadCategoryIcon', {
       type: 'String',
       args: {

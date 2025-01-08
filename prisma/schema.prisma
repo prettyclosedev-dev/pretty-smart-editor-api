@@ -100,6 +100,7 @@ model Category {
   color              String?
   form               String?
   size               Int?
+  priority           Int?
 }
 
 model Design {

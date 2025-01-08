@@ -40,5 +40,6 @@ export const Category = objectType({
     t.model.color()
     t.model.form()
     t.model.size()
+    t.model.priority()
   },
 })

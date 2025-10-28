@@ -74,6 +74,7 @@ export const Query = queryType({
       },
       resolve: async (parent, args, ctx) => {
         try {
+          console.log("Getting branded design")
           const design = await ctx.prisma.design.findUnique({
             where: args.where,
             include: {
@@ -81,6 +82,7 @@ export const Query = queryType({
               creator: true,
             },
           })
+          console.log("design found")
           const user = await ctx.prisma.user.findUnique({
             where: {
               email: args.email,
@@ -97,6 +99,7 @@ export const Query = queryType({
           if (!user) {
             throw new Error('No user found for the email provided.')
           }
+          console.log("user found")
           let brand = args.brandWhere
             ? user.brands?.find(
                 (b) =>
@@ -118,6 +121,7 @@ export const Query = queryType({
           if (!brand) {
             throw new Error('No brand found for the user provided.')
           }
+          console.log("brand found")
           const updatedDesign = await updateDesignWithBrand({
             design,
             brand,
@@ -126,6 +130,8 @@ export const Query = queryType({
             previewOptions: args.previewOptions,
             user,
           })
+
+          console.log("updated design retrieved.")
 
           const returnParams = args.returnParams || []
           if (returnParams?.length > 0) {
@@ -481,7 +487,7 @@ export const Query = queryType({
         orientation: nullable('String'),
       },
       resolve: async (parent, { query, color, orientation }, ctx) => {
-        const apiKey = 'REMOVED_UNSPLASH_KEY'
+        const apiKey = process.env.UNSPLASH_API_KEY
         let apiUrl = `https://api.unsplash.com/search/photos?query=${query}&page=1&per_page=1&client_id=${apiKey}`
 
         if (color) {

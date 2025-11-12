@@ -1,4 +1,4 @@
-import * as express from 'express'
+import express from 'express'
 import { ApolloServer } from 'apollo-server-express'
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core'
 import * as fs from 'fs'
@@ -6,9 +6,9 @@ import * as https from 'https'
 import * as http from 'http'
 import { createContext } from './context'
 import { schema } from './schema'
-import * as basicAuth from 'express-basic-auth'
-import * as cors from 'cors'
-import * as path from 'path'
+import basicAuth from 'express-basic-auth'
+import cors from 'cors'
+import path from 'path'
 import { graphqlUploadExpress } from 'graphql-upload-ts';
 
 require('dotenv').config()
@@ -34,7 +34,7 @@ function getVhostsSSL() {
 
 async function getSSL() {
   try {
-    let result = await getVhostsSSL()
+    let result: any = await getVhostsSSL()
     if (result) {
       let json = JSON.parse(result)
       let found = json.data?.components?.find(

@@ -1,10 +1,6 @@
 import { updateImageAttributes } from './svg.utils'
 import {
-  buildFontVariants,
-  getDynamicFontSize,
   replacePlaceholders,
-  updateFontStyle,
-  updateTextColorAttributes,
 } from './text.utils'
 
 import * as fs from 'fs'
@@ -98,7 +94,7 @@ export async function processChild({ child, brand, additional, withPreview, user
 
   if (child.children) {
     child.children.forEach((nestedChild) => {
-      processChild({ child: nestedChild, brand, withPreview, user })
+      processChild({ child: nestedChild, additional: {}, brand, withPreview, user })
     })
   }
 }

@@ -5,7 +5,7 @@ const { createCanvas, registerFont } = require('canvas')
 export async function smartReplacement({ key, brand }) {
   try {
     if (key.includes('ai_interest_rate')) {
-      const rates = await getRates({ brand })
+      const rates = await getRates()
       const rateMapping = {
         ai_interest_rate_30: rates.rate_30,
         ai_interest_rate_15: rates.rate_15,
@@ -168,7 +168,7 @@ export async function getDynamicFontSize({
 
       const getLines = (ctx, text = '', maxWidth, maxHeight) => {
         var words = text?.split(' ')
-        var lines = []
+        var lines:string[] = []
         var currentLine = words[0]
 
         for (var i = 1; i < words.length; i++) {

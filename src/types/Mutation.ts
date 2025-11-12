@@ -8,12 +8,6 @@ import {
   nullable,
   stringArg,
 } from 'nexus'
-import {
-  importUser,
-  searchProcessesAsync,
-  startImportProcessAsync,
-} from '../utils/general'
-import { Upload } from './Upload'
 import { v4 as uuidv4 } from 'uuid'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -54,7 +48,7 @@ export const Mutation = mutationType({
       resolve: async (_parent, { data }, ctx) => {
         try {
           const success = await ctx.prisma.design.createMany({
-            data,
+            data: data as Prisma.Enumerable<Prisma.DesignCreateManyInput>,
           })
           return !!success
         } catch (e) {
@@ -86,7 +80,7 @@ export const Mutation = mutationType({
       resolve: async (_parent, { data }, ctx) => {
         try {
           const success = await ctx.prisma.category.createMany({
-            data,
+            data: data as Prisma.Enumerable<Prisma.CategoryCreateManyInput>,
           })
           return !!success
         } catch (e) {

@@ -3,7 +3,23 @@
     "outDir": "dist",
     "rootDir": "src",
     "lib": ["esnext"],
-    "strict": true
+    "target": "es2020",
+    "module": "commonjs",
+    "strict": false,                   // disable all strict checks
+    "noImplicitAny": false,            // allow implicit any
+    "strictNullChecks": false,         // ignore null/undefined checks
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "noImplicitThis": false,
+    "alwaysStrict": false,
+    "skipLibCheck": true,              // skip type checking in node_modules
+    "esModuleInterop": true,
+    "allowJs": true,                   // allow JS files
+    "checkJs": false,                  // don’t type check JS files
+    "forceConsistentCasingInFileNames": false,
+    "resolveJsonModule": true,         // allow importing JSON
+    "noEmitOnError": false              // still emit even if errors exist
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

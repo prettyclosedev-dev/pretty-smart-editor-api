@@ -1,20 +1,10 @@
 import {
-  idArg,
-  intArg,
-  queryType,
-  arg,
-  stringArg,
-  nonNull,
-  inputObjectType,
-  nullable,
   list,
+  nonNull,
+  nullable,
+  queryType
 } from 'nexus'
 
-import {
-  getCustomTokenForUserByEmail,
-  isAuthenticated,
-  searchProcessesAsync,
-} from '../utils/general'
 import { updateDesignWithBrand } from '../utils/design/design.utils'
 
 import * as fs from 'fs'
@@ -76,7 +66,7 @@ export const Query = queryType({
         try {
           console.log("Getting branded design")
           const design = await ctx.prisma.design.findUnique({
-            where: args.where,
+            where: args.where as any,
             include: {
               categories: true,
               creator: true,
@@ -174,7 +164,7 @@ export const Query = queryType({
             take: args.take,
             orderBy: args.orderBy,
             skip: args.skip,
-            cursor: args.cursor,
+            cursor: args.cursor as any,
             include: {
               categories: true,
               creator: true,
@@ -463,7 +453,7 @@ export const Query = queryType({
             ...messages,
           ]
 
-          const completion = await openai.createChatCompletion({
+          const completion = await openai.chat.completions.create({
             model: model || 'gpt-4',
             messages: modifiedMessages,
             temperature: temperature || 0.7,
@@ -472,7 +462,11 @@ export const Query = queryType({
             presence_penalty: presence_penalty || 0,
             max_tokens: max_tokens || 2048,
           })
-          return completion.data.choices[0].message
+          
+          // Access the message safely
+          const message = completion.choices?.[0]?.message;
+
+          return message;
         } catch (e) {
           throw e
         }

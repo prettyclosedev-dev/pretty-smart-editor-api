@@ -1,0 +1,20 @@
+services:
+  pretty-smart-editor:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: pretty-smart-editor-api-prod
+    ports:
+      - "18002:4000"
+    restart: unless-stopped
+    networks:
+      - prettyclose
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY="placeholder"
+
+networks:
+  prettyclose:
+    external: true
+    name: prettyclose

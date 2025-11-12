@@ -14,7 +14,12 @@ export async function getRates() {
   const mBaseUrl = 'https://www.mortgagenewsdaily.com'
   const mBaseRatesUrl = `${mBaseUrl}/mortgage-rates`
 
-  const rates = {}
+  const rates = {
+    rate_30: "",
+    rate_15: "",
+    rate_chart: "",
+    rate_graph: "",
+  }
 
   try {
     const { data } = await axios.get(mBaseRatesUrl)
@@ -178,7 +183,11 @@ export async function getRateImages({ brand }) {
     const { data } = await axios.get(mBaseRatesUrl)
     const $ = cheerio.load(data)
 
-    const images = {}
+    const images = {
+      rate_chart: "",
+      rate_graph: "",
+      rate_range: "",
+    }
 
     // Fetch small chart image
     const small_chart_url = $('.header-chart .chart img').attr('src')

@@ -1,4 +1,4 @@
-import { objectType, enumType, extendInputType } from 'nexus'
+import { inputObjectType, objectType, enumType, extendInputType } from 'nexus'
 
 //   export interface ExportOptions {
 //     pixelRatio?: number;
@@ -27,7 +27,7 @@ export const DataType = enumType({
   },
 })
 
-export const ExportOptions = objectType({
+export const ExportOptions = inputObjectType({
   name: 'ExportOptions',
   definition(t) {
     t.field('pixelRatio', {
@@ -48,11 +48,11 @@ export const ExportOptions = objectType({
     t.field('fileName', {
       type: 'String', // save as image;
     })
-    t.model('mimeType', {
-      type: 'MimeType', // 'image/png' | 'image/jpeg'; //application/pdf
+    t.field('mimeType', {
+      type: MimeType, // 'image/png' | 'image/jpeg'; //application/pdf
     })
-    t.model('dataType', {
-      type: 'DataType', // 'base64' | 'dataUrl'
+    t.field('dataType', {
+      type: DataType, // 'base64' | 'dataUrl'
     })
   },
 })
@@ -66,10 +66,33 @@ export const ExportOptions = objectType({
 //fileName
 // }
 
-export const PDFExportOptions = extendInputType({
-  type: 'ExportOptions',
+export const PDFExportOptions = inputObjectType({
   name: 'PDFExportOptions',
   definition(t) {
+     t.field('pixelRatio', {
+      type: 'Int',
+    })
+    t.field('ignoreBackground', {
+      type: 'Boolean',
+    })
+    t.field('pageId', {
+      type: 'String',
+    })
+    t.field('includeBleed', {
+      type: 'Boolean',
+    })
+    t.field('quality', {
+      type: 'Float',
+    })
+    t.field('fileName', {
+      type: 'String', // save as image;
+    })
+    t.field('mimeType', {
+      type: MimeType, // 'image/png' | 'image/jpeg'; //application/pdf
+    })
+    t.field('dataType', {
+      type: DataType, // 'base64' | 'dataUrl'
+    })
     t.field('dpi', {
       type: 'Int',
     })

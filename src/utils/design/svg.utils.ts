@@ -6,6 +6,87 @@ import {
   getLighterColor,
 } from './colors.utils'
 
+// Optional puppeteer fallback for complex SVG retrieval.
+// We keep it lazy-loaded and singleton to prevent spawning many Chromium instances.
+let puppeteer
+try {
+  puppeteer = require('puppeteer')
+} catch (e) {
+  // Puppeteer not available – fallback will be skipped.
+}
+
+const BROWSER_PAGE_LIMIT = 1 // Hard limit to avoid resource spikes.
+let browserPromise = null
+let activePages = 0
+const pageQueue = []
+
+async function getBrowser() {
+  if (!puppeteer) return null
+  if (!browserPromise) {
+    browserPromise = puppeteer.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+      ],
+    })
+  }
+  return browserPromise
+}
+
+function enqueuePageWork(workFn) {
+  return new Promise((resolve, reject) => {
+    pageQueue.push({ workFn, resolve, reject })
+    processPageQueue()
+  })
+}
+
+function processPageQueue() {
+  while (activePages < BROWSER_PAGE_LIMIT && pageQueue.length) {
+    const { workFn, resolve, reject } = pageQueue.shift()
+    activePages++
+    ;(async () => {
+      try {
+        const result = await workFn()
+        resolve(result)
+      } catch (err) {
+        reject(err)
+      } finally {
+        activePages--
+        processPageQueue()
+      }
+    })()
+  }
+}
+
+async function fetchViaBrowser(url) {
+  const browser = await getBrowser()
+  if (!browser) return null
+  return enqueuePageWork(async () => {
+    const page = await browser.newPage()
+    try {
+      const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: 12000 })
+      if (!response) return null
+      const ct = response.headers()['content-type'] || ''
+      if (!ct.includes('image/svg') && !ct.includes('text/xml') && !ct.includes('text/html')) {
+        return null
+      }
+      // Grab raw content (SVGs often served as text/html or image/svg+xml)
+      const content = await response.text()
+      return content
+    } catch (e) {
+      return null
+    } finally {
+      try { await page.close() } catch (_) {}
+    }
+  })
+}
+
+// Deduplicate in-flight fetches by URL (without cache-bust param)
+const inFlight = new Map()
+
 const svgo = require('svgo')
 
 const svgOutputSettings = {
@@ -39,26 +120,70 @@ function addNoCacheParam(url) {
   }
 }
 
-export async function fetchImage(srcUrl) {
+function stripCacheBust(url) {
   try {
-    const noCacheUrl = addNoCacheParam(srcUrl)
-    const response = await fetch(noCacheUrl, {
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
-    })
-    if (!response.ok) {
-      console.error(`HTTP error! status: ${response.status}`)
-      return null
-    } else {
-      const svgText = await response.text()
-      return svgText
-    }
-  } catch (error) {
-    console.error('Error fetching image:', error)
-    return null // Return null or handle as per your application's needs
+    const u = new URL(url)
+    u.searchParams.delete('_')
+    return u.toString()
+  } catch (e) {
+    return url.replace(/([?&])_=[^&]+(&|$)/, '$1').replace(/[?&]$/, '')
   }
+}
+
+function shouldUseBrowser(firstAttemptOk, contentType, bodyText) {
+  if (firstAttemptOk && contentType.includes('image/svg')) return false
+  // If content type ambiguous, very small body, or fetch failed, try browser.
+  if (!firstAttemptOk) return true
+  if (!contentType || (!contentType.includes('svg') && !contentType.includes('xml') && !contentType.includes('text'))) return true
+  if (bodyText && bodyText.length < 50) return true // suspiciously small
+  return false
+}
+
+export async function fetchImage(srcUrl) {
+  const key = stripCacheBust(srcUrl)
+  if (inFlight.has(key)) return inFlight.get(key)
+  const p = (async () => {
+    try {
+      // First attempt: plain fetch without aggressive cache-bust to allow CDN validation.
+      const attemptUrl = addNoCacheParam(srcUrl) // still bust for freshness, but only one attempt.
+      const response = await fetch(attemptUrl, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      })
+      let bodyText = null
+      let contentType = response.headers.get('content-type') || ''
+      let ok = response.ok
+      if (ok) {
+        bodyText = await response.text()
+        // If body clearly SVG markup return early.
+        if (bodyText.trim().startsWith('<svg')) return bodyText
+        // Some servers send data:image/svg+xml;base64
+        if (bodyText.startsWith('data:image/svg+xml')) return bodyText
+      }
+
+      // Decide if we need browser fallback
+      if (!shouldUseBrowser(ok, contentType, bodyText)) {
+        return ok ? bodyText : null
+      }
+
+      const browserSvg = await fetchViaBrowser(srcUrl)
+      return browserSvg || bodyText || null
+    } catch (error) {
+      // Last resort: browser
+      try {
+        const browserSvg = await fetchViaBrowser(srcUrl)
+        return browserSvg
+      } catch (_) {
+        return null
+      }
+    } finally {
+      inFlight.delete(key)
+    }
+  })()
+  inFlight.set(key, p)
+  return p
 }
 
 export function replaceSvgSetting(svg, key, val) {

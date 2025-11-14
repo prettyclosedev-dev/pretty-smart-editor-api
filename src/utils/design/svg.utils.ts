@@ -28,9 +28,26 @@ const svgOutputSettings = {
   ],
 }
 
+function addNoCacheParam(url) {
+  try {
+    const u = new URL(url)
+    u.searchParams.set('_', Date.now().toString())
+    return u.toString()
+  } catch (e) {
+    const sep = url.includes('?') ? '&' : '?'
+    return `${url}${sep}_=${Date.now()}`
+  }
+}
+
 export async function fetchImage(srcUrl) {
   try {
-    const response = await fetch(srcUrl)
+    const noCacheUrl = addNoCacheParam(srcUrl)
+    const response = await fetch(noCacheUrl, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    })
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`)
       return null
@@ -281,20 +298,24 @@ export async function updateImageAttributes({
 
     // Update the src attribute based on the name of the element
     if (elementTypeIncluded) {
-      isBrandSvg = brand[elementType] // not in additional only from brand
-      if (/^https?:\/\//.test(combinedBrand[elementType])) {
-        if (isBrandSvg) {
+      // Determine if the brand asset appears to be an SVG by URL
+      const assetUrl = combinedBrand[elementType]
+      const looksLikeSvg = typeof assetUrl === 'string' && /\.svg(\?|#|$)/i.test(assetUrl)
+      if (/^https?:\/\//.test(assetUrl)) {
+        if (looksLikeSvg) {
           try {
-            fetchedAsset = await fetchImage(combinedBrand[elementType])
+            fetchedAsset = await fetchImage(assetUrl)
+            isBrandSvg = true
           } catch (e) {
             console.log('Error fetching asset:', e)
           }
         } else {
-          child.src = combinedBrand[elementType]
+          child.src = addNoCacheParam(assetUrl)
           return
         }
       } else {
-        child.src = combinedBrand[elementType]
+        child.src = assetUrl
+        return
       }
     }
 
@@ -410,6 +431,16 @@ export async function updateImageAttributes({
       // })
 
       // console.log(child.colorsReplace)
+    }
+    // Fallback: if we fetched an asset but did not update child.src (non-SVG cases), ensure the direct URL is used with cache-busting
+    if (elementTypeIncluded) {
+      const assetUrl = combinedBrand[elementType]
+      if (typeof assetUrl === 'string' && /^https?:\/\//.test(assetUrl)) {
+        // If child.src wasn't set above (e.g., not an SVG or no mutation), set it now with cache busting
+        if (!child.src || child.src === fetchedAsset) {
+          child.src = addNoCacheParam(assetUrl)
+        }
+      }
     }
   } catch (error) {
     console.log(error)

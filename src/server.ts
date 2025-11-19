@@ -10,6 +10,8 @@ import basicAuth from 'express-basic-auth'
 import cors from 'cors'
 import path from 'path'
 import { graphqlUploadExpress } from 'graphql-upload-ts';
+import serveIndex from 'serve-index';
+
 
 require('dotenv').config()
 
@@ -116,10 +118,25 @@ async function startApolloServer() {
 
   console.log(
     '🚀 Server ready at',
-    `http${config.ssl ? 's' : ''}://${config.hostname}:${config.port}${
-      server.graphqlPath
+    `http${config.ssl ? 's' : ''}://${config.hostname}:${config.port}${server.graphqlPath
     }`,
   )
+  
+  app.use((req, res, next) => {
+      console.log('Request URL:', req.url);
+      console.log('Host header:', req.headers.host);
+      next();
+  });
+
+  // Serve uploads folder
+  const uploadsPath = path.join(__dirname, '/uploads'); // adjust path to match your host mount
+  console.log("Serving uploads folder at ", uploadsPath)
+  app.use(
+    '/uploads',
+    express.static(uploadsPath, { index: false }), // correct boolean false
+  );
+
+  app.get('/uploads/test', (req, res) => res.send('Hello uploads!'));
 
   server.applyMiddleware({ app })
 

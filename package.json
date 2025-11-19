@@ -30,6 +30,7 @@
     "openai": "4.24.7",
     "polotno": "2.4.20",
     "polotno-node": "2.9.2",
+    "serve-index": "^1.9.1",
     "svgo": "^3.2.0",
     "text-to-svg": "^3.1.5",
     "unsplash-js": "^7.0.19"

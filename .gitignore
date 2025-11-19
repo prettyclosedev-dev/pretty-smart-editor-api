@@ -108,3 +108,5 @@ src/generated/
 *.env*
 
 .vscode
+
+uploads
